@@ -9,7 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
 
-    "outDir": "./built/",
+    "outDir": "./dist/",
     "module": "es2015",
     "moduleResolution": "node",
     "target": "es5"

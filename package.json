@@ -1,0 +1,23 @@
+{
+  "name": "@urqw/core",
+  "version": "0.9.0",
+  "description": "",
+  "main": "dist/Client.js",
+  "scripts": {
+    "prepublish": "tsc --declaration --sourceMap",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/urqw/core.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/urqw/core/issues"
+  },
+  "homepage": "https://github.com/urqw/core#readme",
+  "devDependencies": {
+    "typescript": "^3.5.2"
+  }
+}

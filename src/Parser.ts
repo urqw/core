@@ -16,7 +16,7 @@ export default class Parser {
     this.Expression = new Expression(Game);
   }
 
-  parse(line : string) {
+  parse(line : string) : any {
     line = line.replace(/^\s+/, "");
     // просмотреть список известных операторов
     let expl = line.split(" ");

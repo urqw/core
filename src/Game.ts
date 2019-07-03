@@ -1,14 +1,14 @@
 import Quest from "./Quest";
 
-export interface itemInterface {
+export interface ItemInterface {
     [key: string]: number
 }
 
-export interface varInterface {
+export interface VarInterface {
     [key: string]: string | number
 }
 
-export interface systemVarInterface {
+export interface SystemVarInterface {
     [key: string]: {
         defaultValue : string | number,
         value : string | number,
@@ -17,7 +17,7 @@ export interface systemVarInterface {
     }
 }
 
-export interface resourceInterface {
+export interface ResourceInterface {
     [key: string]: string
 }
 
@@ -25,11 +25,11 @@ export interface resourceInterface {
  * Игра (состояние)
  */
 export default class Game {
-    get resources(): resourceInterface {
+    get resources(): ResourceInterface {
         return this._resources;
     }
 
-    set resources(value: resourceInterface) {
+    set resources(value: ResourceInterface) {
         this._resources = value;
     }
 
@@ -41,19 +41,19 @@ export default class Game {
         this._position = value;
     }
 
-    get vars(): varInterface {
+    get vars(): VarInterface {
         return this._vars;
     }
 
-    set vars(value: varInterface) {
+    set vars(value: VarInterface) {
         this._vars = value;
     }
 
-    get items(): itemInterface {
+    get items(): ItemInterface {
         return this._items;
     }
 
-    set items(value: itemInterface) {
+    set items(value: ItemInterface) {
         this._items = value;
     }
 
@@ -67,13 +67,13 @@ export default class Game {
 
     protected locked: boolean = true;
 
-    private _resources: resourceInterface = {};
+    private _resources: ResourceInterface = {};
 
-    private _items: itemInterface = {};
+    private _items: ItemInterface = {};
 
-    private _vars: varInterface = {};
+    private _vars: VarInterface = {};
 
-    protected systemVars: systemVarInterface = {
+    protected systemVars: SystemVarInterface = {
         'urq_mode': {
             'defaultValue' : '',
             'value' : '',

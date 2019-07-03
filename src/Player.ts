@@ -1,7 +1,7 @@
 import Parser from "./Parser";
 import Client from "./Client";
 import {dosColorToHex} from "./tools";
-import Game, {itemInterface, varInterface} from "./Game";
+import Game, {ItemInterface, VarInterface} from "./Game";
 import ModeUrqRip from "./modes/urqrip";
 import ModeUrqDos from "./modes/urqdos";
 
@@ -11,12 +11,12 @@ export enum modes {
     URQW = 'urqw',
 }
 
-export interface savedGameInterface {
+export interface SavedGameInterface {
     status: status,
-    text: contentInterface[],
-    buttons: buttonInterface[],
-    items: itemInterface,
-    vars: varInterface,
+    text: ContentInterface[],
+    buttons: ButtonInterface[],
+    items: ItemInterface,
+    vars: VarInterface,
     position: number,
 }
 
@@ -35,29 +35,29 @@ export enum status {
     QUIT,
 }
 
-export interface contentInterface {
+export interface ContentInterface {
     img?: string,
     text?: string,
     ln?: boolean,
     color?: string
 }
 
-export interface buttonInterface {
+export interface ButtonInterface {
     id: number,
     command: string,
     desc: string,
 }
 
-interface linkInterface {
+interface LinkInterface {
     [key: number]: string
 }
 
 export default class Player {
-    get text(): contentInterface[] {
+    get text(): ContentInterface[] {
         return this._text;
     }
 
-    get buttons(): buttonInterface[] {
+    get buttons(): ButtonInterface[] {
         return this._buttons;
     }
 
@@ -65,9 +65,9 @@ export default class Player {
     public game: Game;
     protected parser: Parser;
 
-    private _text: contentInterface[] = [];
-    private _buttons: buttonInterface[] = [];
-    protected links: linkInterface = {};
+    private _text: ContentInterface[] = [];
+    private _buttons: ButtonInterface[] = [];
+    protected links: LinkInterface = {};
 
     protected status: status = status.NEXT;
     protected inf: string = '';
@@ -497,7 +497,7 @@ export default class Player {
     /**
      * сохранение
      */
-    public save(): savedGameInterface {
+    public save(): SavedGameInterface {
         return {
             status: this.getStatus(),
             text: this._text,
@@ -511,7 +511,7 @@ export default class Player {
     /**
      * загрузка
      */
-    public load(data: savedGameInterface): void {
+    public load(data: SavedGameInterface): void {
         this.status = data.status;
         this._text = data.text;
         this._buttons = data.buttons;

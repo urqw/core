@@ -1,5 +1,5 @@
-import Player, {status, savedGameInterface, contentInterface, buttonInterface} from "./Player";
-import Game, {resourceInterface} from "./Game";
+import Player, {status, SavedGameInterface, ContentInterface, ButtonInterface} from "./Player";
+import Game, {ResourceInterface} from "./Game";
 
 export default class Client {
     public static gameMusic = new Audio();
@@ -14,9 +14,9 @@ export default class Client {
      */
     protected game: Game;
 
-    protected text: contentInterface[] = [];
+    protected text: ContentInterface[] = [];
 
-    protected buttons: buttonInterface[] = [];
+    protected buttons: ButtonInterface[] = [];
 
     protected style: { backgroundColor: string, textColor: string } = {
         backgroundColor: '',
@@ -32,7 +32,7 @@ export default class Client {
     /**
      * инстанс новой игры
      */
-    public static createGame(questname: string, quest: string, resources: resourceInterface, mode: string = "urqw"): Client {
+    public static createGame(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw"): Client {
         let GameInstance : Game = new Game(questname, quest);
         GameInstance.resources = resources;
         GameInstance.setVar('urq_mode', mode);
@@ -113,7 +113,7 @@ export default class Client {
         return this.game.name;
     }
 
-    public saveGame(): savedGameInterface | null {
+    public saveGame(): SavedGameInterface | null {
         if (this.game.isLocked()) {
             return null;
         }
@@ -121,7 +121,7 @@ export default class Client {
         return this.player.save();
     }
 
-    public loadGame(data: savedGameInterface): boolean {
+    public loadGame(data: SavedGameInterface): boolean {
         if (this.game.isLocked()) {
             return false;
         }
@@ -154,7 +154,7 @@ export default class Client {
         return "<a data-action='" + action + "'>" + text + "</a>";
     }
 
-    public static removeLinks(text: contentInterface[]): contentInterface[] {
+    public static removeLinks(text: ContentInterface[]): ContentInterface[] {
         for (let i : number = 0; i < text.length; i++) {
             if (text[i].text !== undefined) {
                 text[i].text = text[i].text!.replace(

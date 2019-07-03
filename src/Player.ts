@@ -48,7 +48,7 @@ export interface ButtonInterface {
     desc: string,
 }
 
-interface LinkInterface {
+export interface LinkInterface {
     [key: number]: string
 }
 

@@ -1,19 +1,19 @@
-import Expression from "./RPN";
+import Expression from "./Expression";
 import Game from "./Game";
 import Player, {gotoType} from "./Player";
 import { isFloat } from "./tools";
 
 export default class Parser {
-  Player : Player;
-  Expression : Expression;
+  player : Player;
+  expression : Expression;
 
   constructor(Player : Player, Game : Game) {
     /**
      * проигрыватель
      */
-    this.Player = Player;
+    this.player = Player;
 
-    this.Expression = new Expression(Game);
+    this.expression = new Expression(Game);
   }
 
   parse(line : string) : any {
@@ -49,7 +49,7 @@ export default class Parser {
         els = line.substring(line.indexOf(" else ") + 6);
       }
 
-      let conditionResult = this.Expression.setExpression(this.openTags(cond)).calc();
+      let conditionResult = this.expression.setExpression(this.openTags(cond)).calc();
 
       if (conditionResult === true || conditionResult > 0) {
         this.parse(then);
@@ -74,7 +74,7 @@ export default class Parser {
           com = this.openTags(com);
         }
 
-        return this.Player.btn(com, desc);
+        return this.player.btn(com, desc);
       }
     }
 
@@ -88,51 +88,51 @@ export default class Parser {
 
     switch (operand) {
       case "save":
-        return this.Player.save();
+        return this.player.save();
       case "image":
-        return this.Player.image(command.toString().trim());
+        return this.player.image(command.trim());
       case "music":
-        return this.Player.playMusic(command.toString().trim(), false);
+        return this.player.playMusic(command.trim(), false);
       case "play":
         let Sound;
-        if (this.Player.Game.resources === null) {
+        if (this.player.game.resources === null) {
           Sound = new Audio(
-            "quests/" + this.Player.Game.name + "/" + command.toString().trim()
+            "quests/" + this.player.game.name + "/" + command.trim()
           );
         } else {
-          Sound = new Audio(this.Player.Game.resources[command.toString().trim()]);
+          Sound = new Audio(this.player.game.resources[command.trim()]);
         }
 
-        Sound.volume = this.Player.Client.getVolume();
+        Sound.volume = this.player.client.getVolume();
         Sound.play();
 
         break;
       case "clsb":
-        return this.Player.clsb();
+        return this.player.clsb();
       case "cls":
-        return this.Player.cls();
+        return this.player.cls();
       case "forget_procs":
-        return this.Player.forgetProcs();
+        return this.player.forgetProcs();
       case "proc":
-        return this.Player.proc(command.toString().trim());
+        return this.player.proc(command.trim());
       case "end":
-        return this.Player.end();
+        return this.player.end();
       case "anykey":
-        return this.Player.anykey(command.toString().trim());
+        return this.player.anykey(command.trim());
       case "pause":
-        return this.Player.pause(parseInt(command));
+        return this.player.pause(parseInt(command));
       case "input":
-        return this.Player.input(command.toString().trim());
+        return this.player.input(command.trim());
       case "quit":
-        return this.Player.quit();
+        return this.player.quit();
       case "invkill":
-        return this.Player.invkill(
-          command.toString().trim().length > 0
-            ? command.toString().trim()
+        return this.player.invkill(
+          command.trim().length > 0
+            ? command.trim()
             : null
         );
       case "perkill":
-        return this.Player.perkill();
+        return this.player.perkill();
       case "inv-":
         let itemRemove : string;
         let quantityRemove : number;
@@ -144,7 +144,7 @@ export default class Parser {
           itemRemove = command.split(",")[0];
         }
 
-        return this.Player.invRemove(itemRemove.trim(), quantityRemove);
+        return this.player.invRemove(itemRemove.trim(), quantityRemove);
       case "inv+":
         let itemAdd : string;
         let quantityAdd : number;
@@ -156,19 +156,19 @@ export default class Parser {
             itemAdd = command.split(",")[0];
         }
 
-        return this.Player.invAdd(itemAdd.trim(), quantityAdd);
+        return this.player.invAdd(itemAdd.trim(), quantityAdd);
       case "goto":
-        return this.Player.goto(command.toString().trim(), gotoType.GOTO);
+        return this.player.goto(command.trim(), gotoType.GOTO);
       case "p":
       case "print":
-        return this.Player.print(this.openLinks(command), false);
+        return this.player.print(this.openLinks(command), false);
       case "pln":
       case "println":
-        return this.Player.print(this.openLinks(command), true);
+        return this.player.print(this.openLinks(command), true);
       case "btn":
         let btn = command.split(",");
 
-        return this.Player.btn(
+        return this.player.btn(
           btn[0].trim(),
           btn
             .slice(1)
@@ -179,12 +179,12 @@ export default class Parser {
       case "tokens":
         let reg;
 
-        if (this.Player.Game.getVar("tokens_delim") === "char") {
+        if (this.player.game.getVar("tokens_delim") === "char") {
           reg = "";
         } else {
           reg = new RegExp(
             "[" +
-              String(this.Player.Game.getVar("tokens_delim")).replace(
+              String(this.player.game.getVar("tokens_delim")).replace(
                 /[-[\]{}()*+?.,\\^$|#\s]/g,
                 "\\$&"
               ) +
@@ -193,12 +193,12 @@ export default class Parser {
           );
         }
 
-        let str : string[] = String((this.Expression.setExpression(command.trim())).calc()).split(reg);
+        let str : string[] = String((this.expression.setExpression(command.trim())).calc()).split(reg);
 
-        this.Player.setVar("tokens_num", str.length);
+        this.player.setVar("tokens_num", str.length);
 
         for (let i = 0; i < str.length; i++) {
-          this.Player.setVar("token" + (i + 1), str[i]);
+          this.player.setVar("token" + (i + 1), str[i]);
         }
 
         break;
@@ -206,9 +206,9 @@ export default class Parser {
         line = command;
 
         if (line.indexOf("=") > 0) {
-          this.Player.setVar(
+          this.player.setVar(
             line.substring(0, line.indexOf("=")).trim(),
-              String(this.Expression.setExpression("'" + line.substr(line.indexOf("=") + 1) + "'").calc())
+              String(this.expression.setExpression("'" + line.substr(line.indexOf("=") + 1) + "'").calc())
           );
         }
 
@@ -219,9 +219,9 @@ export default class Parser {
       default:
         //  это выражение?
           if (line.indexOf("=") > 0) {
-              this.Player.setVar(
+              this.player.setVar(
                   line.substring(0, line.indexOf("=")).trim(),
-                  String(this.Expression.setExpression(line.substr(line.indexOf("=") + 1)).calc())
+                  String(this.expression.setExpression(line.substr(line.indexOf("=") + 1)).calc())
               );
         } else {
           console.log("Unknown operand: " + operand + " ignored (line: " + line + ")");
@@ -240,7 +240,7 @@ export default class Parser {
       .indexOf("&");
 
     if (pos !== -1) {
-      this.Player.flowAdd(line.substring(pos + 1));
+      this.player.flowAdd(line.substring(pos + 1));
       line = line.substring(0, pos).replace(/^\s+/, "");
     }
 
@@ -267,7 +267,7 @@ export default class Parser {
         } else {
           exp = exp.substr(1, exp.length - 2);
         }
-        let result = this.Expression.setExpression(exp).calc();
+        let result = this.expression.setExpression(exp).calc();
 
         return String(isFloat(result) ? Number(result).toFixed(2) : result);
       });
@@ -295,7 +295,7 @@ export default class Parser {
           text = exp;
         }
 
-        return this.Player.link(text, command);
+        return this.player.link(text, command);
       });
     }
 

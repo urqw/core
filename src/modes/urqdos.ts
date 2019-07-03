@@ -5,9 +5,9 @@ function set() {
    * следующая строка
    */
   Player.prototype.next = function() : string | null {
-    let line = this.Game.Quest.get(this.Game.position);
+    let line = this.game.quest.get(this.game.position);
 
-    this.Game.position++;
+    this.game.position++;
 
     if (line === null) {
       return null;
@@ -25,7 +25,7 @@ function set() {
    * прыгнуть на метку
    */
   Player.prototype.goto = function(labelName: string, type: gotoType): boolean {
-    let labelPosition: number | null = this.Game.Quest.getLabelPosition(labelName);
+    let labelPosition: number | null = this.game.quest.getLabelPosition(labelName);
 
     if (labelPosition === null) {
       return false;
@@ -33,17 +33,17 @@ function set() {
 
     // todo контанты
     if (type === gotoType.BTN) {
-      this.Game.setVar("previous_loc", this.Game.getVar("current_loc"));
-      this.Game.setVar("current_loc", labelName);
+      this.game.setVar("previous_loc", this.game.getVar("current_loc"));
+      this.game.setVar("current_loc", labelName);
     }
 
     if (type === gotoType.BTN || type === gotoType.GOTO || type === gotoType.PROC) {
-      let labelCounter : number = +this.Game.getVar("count_" + labelName);
+      let labelCounter : number = +this.game.getVar("count_" + labelName);
 
-      this.Game.setVar("count_" + labelName, labelCounter + 1);
+      this.game.setVar("count_" + labelName, labelCounter + 1);
     }
 
-    this.Game.position = labelPosition;
+    this.game.position = labelPosition;
 
     // весь стек что дальше очищается
     this.flowStack[this.flow] = [];

@@ -1,14 +1,14 @@
 import Quest from "./Quest";
 
-export interface itemInterface {
+export interface ItemInterface {
     [key: string]: number
 }
 
-export interface varInterface {
+export interface VarInterface {
     [key: string]: string | number
 }
 
-export interface systemVarInterface {
+export interface SystemVarInterface {
     [key: string]: {
         defaultValue : string | number,
         value : string | number,
@@ -17,7 +17,7 @@ export interface systemVarInterface {
     }
 }
 
-export interface resourceInterface {
+export interface ResourceInterface {
     [key: string]: string
 }
 
@@ -25,40 +25,8 @@ export interface resourceInterface {
  * Игра (состояние)
  */
 export default class Game {
-    get resources(): resourceInterface {
-        return this._resources;
-    }
-
-    set resources(value: resourceInterface) {
-        this._resources = value;
-    }
-
-    get position(): number {
-        return this._position;
-    }
-
-    set position(value: number) {
-        this._position = value;
-    }
-
-    get vars(): varInterface {
-        return this._vars;
-    }
-
-    set vars(value: varInterface) {
-        this._vars = value;
-    }
-
-    get items(): itemInterface {
-        return this._items;
-    }
-
-    set items(value: itemInterface) {
-        this._items = value;
-    }
-
-    get Quest(): Quest {
-        return this._Quest;
+    get quest(): Quest {
+        return this._quest;
     }
 
     get name(): string {
@@ -67,13 +35,13 @@ export default class Game {
 
     protected locked: boolean = true;
 
-    private _resources: resourceInterface = {};
+    public resources: ResourceInterface = {};
 
-    private _items: itemInterface = {};
+    public items: ItemInterface = {};
 
-    private _vars: varInterface = {};
+    public vars: VarInterface = {};
 
-    protected systemVars: systemVarInterface = {
+    protected systemVars: SystemVarInterface = {
         'urq_mode': {
             'defaultValue' : '',
             'value' : '',
@@ -162,13 +130,13 @@ export default class Game {
     /**
      * хранилище файла квеста
      */
-    private _Quest: Quest;
+    private _quest: Quest;
 
-    private _position: number = 0;
+    public position: number = 0;
 
     constructor(name: string, qst: string) {
         this._name = name;
-        this._Quest = new Quest(qst);
+        this._quest = new Quest(qst);
 
         this.clean();
     }
@@ -183,16 +151,16 @@ export default class Game {
 
     public setItem(name: string, count: number): void {
         if (count <= 0) {
-            delete this._items[name];
+            delete this.items[name];
             this.setVar(name, 0);
         } else {
-            this._items[name] = count;
+            this.items[name] = count;
             this.setVar(name, count);
         }
     }
 
     public getItem(name: string): number {
-        return this._items[name] === undefined ? 0 : this._items[name];
+        return this.items[name] === undefined ? 0 : this.items[name];
     }
 
     public setVar(variable: string, value: string | number) {
@@ -209,7 +177,7 @@ export default class Game {
 
                 this.setItem(variable, Number(value));
             } else {
-                this._vars[variable] = value;
+                this.vars[variable] = value;
             }
         }
     }
@@ -258,8 +226,8 @@ export default class Game {
         }
 */
 
-        if (this._vars[variable] !== undefined) {
-            return this._vars[variable];
+        if (this.vars[variable] !== undefined) {
+            return this.vars[variable];
         }
 
         return 0;
@@ -269,16 +237,16 @@ export default class Game {
      * очистка
      */
     public clean(): void {
-        this._position = 0;
-        this._items = {};
-        this._vars = {};
+        this.position = 0;
+        this.items = {};
+        this.vars = {};
 
         for (let key in this.systemVars) {
             this.systemVars[key].value = this.systemVars[key].defaultValue;
         }
 
-        this.setVar("current_loc", this._Quest.firstLabel);
-        this.setVar("previous_loc", this._Quest.firstLabel);
+        this.setVar("current_loc", this._quest.firstLabel);
+        this.setVar("previous_loc", this._quest.firstLabel);
     }
 
     public isLocked(): boolean {

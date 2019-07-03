@@ -1,5 +1,11 @@
-import Player, {status, savedGameInterface, contentInterface, buttonInterface} from "./Player";
-import Game, {resourceInterface} from "./Game";
+import Player, {status, SavedGameInterface, ContentInterface, ButtonInterface} from "./Player";
+import Game, {ResourceInterface} from "./Game";
+import { intColorToRgb } from "./tools";
+
+interface GameStyle {
+    backgroundColor: string,
+    textColor: string
+}
 
 export default class Client {
     public static gameMusic = new Audio();
@@ -8,31 +14,31 @@ export default class Client {
     /**
      * проигрыватель
      */
-    protected Player: Player;
+    protected player: Player;
     /**
      * инстанс игры
      */
-    protected Game: Game;
+    protected game: Game;
 
-    protected text: contentInterface[] = [];
+    protected text: ContentInterface[] = [];
 
-    protected buttons: buttonInterface[] = [];
+    protected buttons: ButtonInterface[] = [];
 
-    protected style: { backgroundColor: string, textColor: string } = {
+    protected style: GameStyle = {
         backgroundColor: '',
         textColor: '',
     };
 
-    constructor(GameInstance: Game) {
-        this.Game = GameInstance;
-        this.Player = new Player(this.Game, this);
-        this.Player.continue()
+    constructor(gameInstance: Game) {
+        this.game = gameInstance;
+        this.player = new Player(this.game, this);
+        this.player.continue()
     }
 
     /**
      * инстанс новой игры
      */
-    public static createGame(questname: string, quest: string, resources: resourceInterface, mode: string = "urqw"): Client {
+    public static createGame(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw"): Client {
         let GameInstance : Game = new Game(questname, quest);
         GameInstance.resources = resources;
         GameInstance.setVar('urq_mode', mode);
@@ -51,22 +57,22 @@ export default class Client {
      * btn
      */
     public btnClick(action: number): void {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return;
         }
 
-        this.Player.action(action);
+        this.player.action(action);
     }
 
     /**
      * link
      */
     public linkClick(action: number): void {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return;
         }
 
-        this.Player.action(action, true);
+        this.player.action(action, true);
     }
 
     /**
@@ -74,7 +80,7 @@ export default class Client {
      */
     public anykeyDone(keyCode: string): void {
         if (this.isStatusAnykey()) {
-            this.Player.anykeyAction(keyCode);
+            this.player.anykeyAction(keyCode);
         }
 
         return;
@@ -85,7 +91,7 @@ export default class Client {
      */
     public inputDone(text: string) {
         if (this.isStatusInput()) {
-            return this.Player.inputAction(text);
+            return this.player.inputAction(text);
         }
 
         return false;
@@ -93,11 +99,11 @@ export default class Client {
 
 
     public isStatusInput(): boolean {
-        return this.Player.getStatus() === status.INPUT;
+        return this.player.getStatus() === status.INPUT;
     }
 
     public isStatusAnykey(): boolean {
-        return this.Player.getStatus() === status.ANYKEY;
+        return this.player.getStatus() === status.ANYKEY;
     }
 
     public getVolume(): number {
@@ -110,23 +116,23 @@ export default class Client {
     }
 
     public getGameName(): string {
-        return this.Game.name;
+        return this.game.name;
     }
 
-    public saveGame(): savedGameInterface | null {
-        if (this.Game.isLocked()) {
+    public saveGame(): SavedGameInterface | null {
+        if (this.game.isLocked()) {
             return null;
         }
 
-        return this.Player.save();
+        return this.player.save();
     }
 
-    public loadGame(data: savedGameInterface): boolean {
-        if (this.Game.isLocked()) {
+    public loadGame(data: SavedGameInterface): boolean {
+        if (this.game.isLocked()) {
             return false;
         }
 
-        this.Player.load(data);
+        this.player.load(data);
 
         this.render();
 
@@ -134,13 +140,13 @@ export default class Client {
     }
 
     public restartGame(): Client | null {
-        if (this.Player.getStatus() === status.NEXT) {
+        if (this.player.getStatus() === status.NEXT) {
             return null;
         }
 
-        this.Player.restart();
+        this.player.restart();
 
-        return new Client(this.Game);
+        return new Client(this.game);
     }
 
     public static getLineBreakSymbol() {
@@ -154,7 +160,7 @@ export default class Client {
         return "<a data-action='" + action + "'>" + text + "</a>";
     }
 
-    public static removeLinks(text: contentInterface[]): contentInterface[] {
+    public static removeLinks(text: ContentInterface[]): ContentInterface[] {
         for (let i : number = 0; i < text.length; i++) {
             if (text[i].text !== undefined) {
                 text[i].text = text[i].text!.replace(
@@ -168,16 +174,12 @@ export default class Client {
     }
 
     protected setBackColor(): void {
-        let styleBackcolor : string | number = this.Game.getVar('style_backcolor');
+        const styleBackcolor : string | number = this.game.getVar('style_backcolor');
 
         if (typeof styleBackcolor === 'string') {
             this.style.backgroundColor = styleBackcolor;
-        } else if (this.Game.getVar('style_backcolor') > 0) {
-            let red = (styleBackcolor >> 16) & 0xFF;
-            let green = (styleBackcolor >> 8) & 0xFF;
-            let blue = styleBackcolor & 0xFF;
-
-            this.style.backgroundColor = `rgb(${blue}, ${green}, ${red})`;
+        } else if (styleBackcolor > 0) {
+            this.style.backgroundColor = intColorToRgb(styleBackcolor);
         }
     }
 
@@ -186,7 +188,7 @@ export default class Client {
      */
     public render(): void {
         // костыли для <img> тега
-        let text = this.Player.text;
+        let text = this.player.text;
         for (let i = 0; i < text.length; i++) {
             if (text[i].text !== undefined) {
                 let regex = /(<img[^>]+src=")([^">]+)"/i;
@@ -195,7 +197,7 @@ export default class Client {
                     if (src !== null) {
                         text[i].text = text[i].text!.replace(
                             /(<img[^>]+src=")([^">]+)"/gi,
-                            '$1' + this.Game.resources[src[2]] + "\""
+                            '$1' + this.game.resources[src[2]] + "\""
                         );
 
                     }
@@ -204,7 +206,7 @@ export default class Client {
         }
 
         this.text = text;
-        this.buttons = this.Player.buttons;
+        this.buttons = this.player.buttons;
         this.setBackColor();
     }
 }

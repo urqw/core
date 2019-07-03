@@ -172,7 +172,7 @@ export default class Game {
                 callback(value);
             }
         } else {
-            if (variable.substr(0, 4) === "inv_") {
+            if (variable.startsWith("inv_")) {
                 variable = variable.substr(4);
 
                 this.setItem(variable, Number(value));
@@ -192,18 +192,18 @@ export default class Game {
             }
         }
 
-        if (variable.substr(0, 4) === "inv_") {
+        if (variable.startsWith("inv_")) {
             variable = variable.substr(4);
         }
 
         if (variable === "rnd") {
             return Math.random();
-        } else if (variable.substr(0, 3) === "rnd") {
+        } else if (variable.startsWith("rnd")) {
             return Math.floor(Math.random() * parseInt(variable.substr(3))) + 1;
         }
 
         if (variable === "time") {
-            let Datetime = new Date();
+            const Datetime = new Date();
             return (
                 Datetime.getHours() * 3600 +
                 Datetime.getMinutes() * 60 +
@@ -214,7 +214,7 @@ export default class Game {
 
         // Для выражений вроде "1 деньги"
         if (variable.split(" ").length > 1) {
-            let count = variable.split(" ")[0];
+            const count = variable.split(" ")[0];
             if (!isNaN(count)) {
                 variable = variable
                     .split(" ")

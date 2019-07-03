@@ -1,5 +1,6 @@
 import Expression from "./Expression";
 import Game from "./Game";
+import Client from "./Client";
 import Player, {gotoType} from "./Player";
 import { isFloat } from "./tools";
 
@@ -251,6 +252,9 @@ export default class Parser {
    * Открываем #$, #%$
    */
   openTags(line : string) : string {
+    const breakSymbol = Client.getLineBreakSymbol();
+    line = line.replace(/#\/\$/g, breakSymbol);
+    line = line.replace(/#%\/\$/g, breakSymbol);
     line = line.replace(/#\$/g, " ");
     line = line.replace(/#%\$/g, " ");
 
@@ -267,7 +271,7 @@ export default class Parser {
         } else {
           exp = exp.substr(1, exp.length - 2);
         }
-        let result = this.expression.setExpression(exp).calc();
+        const result = this.expression.setExpression(exp).calc();
 
         return String(isFloat(result) ? Number(result).toFixed(2) : result);
       });
@@ -284,7 +288,7 @@ export default class Parser {
         exp = exp.substr(2, exp.length - 4);
 
         if (exp.indexOf("|") > 0) {
-          let exptmp = exp.split("|");
+          const exptmp = exp.split("|");
           command = exptmp
             .slice(1)
             .join("|")

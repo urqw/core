@@ -14,7 +14,7 @@ function set() {
     }
 
     // вырезать комментарий
-    if (line.indexOf(";") !== -1) {
+    if (line.includes(";")) {
       line = line.substring(0, line.indexOf(";"));
     }
 
@@ -25,7 +25,7 @@ function set() {
    * прыгнуть на метку
    */
   Player.prototype.goto = function(labelName: string, type: gotoType): boolean {
-    let labelPosition: number | null = this.game.quest.getLabelPosition(labelName);
+    const labelPosition: number | null = this.game.quest.getLabelPosition(labelName);
 
     if (labelPosition === null) {
       return false;
@@ -38,7 +38,7 @@ function set() {
     }
 
     if (type === gotoType.BTN || type === gotoType.GOTO || type === gotoType.PROC) {
-      let labelCounter : number = +this.game.getVar("count_" + labelName);
+      const labelCounter : number = +this.game.getVar("count_" + labelName);
 
       this.game.setVar("count_" + labelName, labelCounter + 1);
     }

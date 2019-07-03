@@ -39,9 +39,9 @@ export default class Client {
      * инстанс новой игры
      */
     public static createGame(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw"): Client {
-        let GameInstance : Game = new Game(questname, quest);
+        const GameInstance : Game = new Game(questname, quest);
         GameInstance.resources = resources;
-        GameInstance.setVar('urq_mode', mode);
+        GameInstance.setVar("urq_mode", mode);
 
         return new Client(GameInstance);
     }

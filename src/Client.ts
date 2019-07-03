@@ -1,5 +1,11 @@
 import Player, {status, SavedGameInterface, ContentInterface, ButtonInterface} from "./Player";
 import Game, {ResourceInterface} from "./Game";
+import { intColorToRgb } from "./tools";
+
+interface GameStyle {
+    backgroundColor: string,
+    textColor: string
+}
 
 export default class Client {
     public static gameMusic = new Audio();
@@ -18,13 +24,13 @@ export default class Client {
 
     protected buttons: ButtonInterface[] = [];
 
-    protected style: { backgroundColor: string, textColor: string } = {
+    protected style: GameStyle = {
         backgroundColor: '',
         textColor: '',
     };
 
-    constructor(GameInstance: Game) {
-        this.game = GameInstance;
+    constructor(gameInstance: Game) {
+        this.game = gameInstance;
         this.player = new Player(this.game, this);
         this.player.continue()
     }
@@ -168,16 +174,12 @@ export default class Client {
     }
 
     protected setBackColor(): void {
-        let styleBackcolor : string | number = this.game.getVar('style_backcolor');
+        const styleBackcolor : string | number = this.game.getVar('style_backcolor');
 
         if (typeof styleBackcolor === 'string') {
             this.style.backgroundColor = styleBackcolor;
-        } else if (this.game.getVar('style_backcolor') > 0) {
-            let red = (styleBackcolor >> 16) & 0xFF;
-            let green = (styleBackcolor >> 8) & 0xFF;
-            let blue = styleBackcolor & 0xFF;
-
-            this.style.backgroundColor = `rgb(${blue}, ${green}, ${red})`;
+        } else if (styleBackcolor > 0) {
+            this.style.backgroundColor = intColorToRgb(styleBackcolor);
         }
     }
 

@@ -66,3 +66,11 @@ export const MIME = {
   midi: "audio/midi",
   mp3: "audio/mp3"
 };
+
+export function intColorToRgb(color : number) : string {
+  const red = (color >> 16) & 0xff;
+  const green = (color >> 8) & 0xff;
+  const blue = color & 0xff;
+
+  return `rgb(${blue}, ${green}, ${red})`;
+}

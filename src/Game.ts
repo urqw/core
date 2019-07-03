@@ -25,38 +25,6 @@ export interface ResourceInterface {
  * Игра (состояние)
  */
 export default class Game {
-    get resources(): ResourceInterface {
-        return this._resources;
-    }
-
-    set resources(value: ResourceInterface) {
-        this._resources = value;
-    }
-
-    get position(): number {
-        return this._position;
-    }
-
-    set position(value: number) {
-        this._position = value;
-    }
-
-    get vars(): VarInterface {
-        return this._vars;
-    }
-
-    set vars(value: VarInterface) {
-        this._vars = value;
-    }
-
-    get items(): ItemInterface {
-        return this._items;
-    }
-
-    set items(value: ItemInterface) {
-        this._items = value;
-    }
-
     get quest(): Quest {
         return this._quest;
     }
@@ -67,11 +35,11 @@ export default class Game {
 
     protected locked: boolean = true;
 
-    private _resources: ResourceInterface = {};
+    public resources: ResourceInterface = {};
 
-    private _items: ItemInterface = {};
+    public items: ItemInterface = {};
 
-    private _vars: VarInterface = {};
+    public vars: VarInterface = {};
 
     protected systemVars: SystemVarInterface = {
         'urq_mode': {
@@ -164,7 +132,7 @@ export default class Game {
      */
     private _quest: Quest;
 
-    private _position: number = 0;
+    public position: number = 0;
 
     constructor(name: string, qst: string) {
         this._name = name;
@@ -183,16 +151,16 @@ export default class Game {
 
     public setItem(name: string, count: number): void {
         if (count <= 0) {
-            delete this._items[name];
+            delete this.items[name];
             this.setVar(name, 0);
         } else {
-            this._items[name] = count;
+            this.items[name] = count;
             this.setVar(name, count);
         }
     }
 
     public getItem(name: string): number {
-        return this._items[name] === undefined ? 0 : this._items[name];
+        return this.items[name] === undefined ? 0 : this.items[name];
     }
 
     public setVar(variable: string, value: string | number) {
@@ -209,7 +177,7 @@ export default class Game {
 
                 this.setItem(variable, Number(value));
             } else {
-                this._vars[variable] = value;
+                this.vars[variable] = value;
             }
         }
     }
@@ -258,8 +226,8 @@ export default class Game {
         }
 */
 
-        if (this._vars[variable] !== undefined) {
-            return this._vars[variable];
+        if (this.vars[variable] !== undefined) {
+            return this.vars[variable];
         }
 
         return 0;
@@ -269,9 +237,9 @@ export default class Game {
      * очистка
      */
     public clean(): void {
-        this._position = 0;
-        this._items = {};
-        this._vars = {};
+        this.position = 0;
+        this.items = {};
+        this.vars = {};
 
         for (let key in this.systemVars) {
             this.systemVars[key].value = this.systemVars[key].defaultValue;

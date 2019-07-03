@@ -90,17 +90,17 @@ export default class Parser {
       case "save":
         return this.player.save();
       case "image":
-        return this.player.image(command.toString().trim());
+        return this.player.image(command.trim());
       case "music":
-        return this.player.playMusic(command.toString().trim(), false);
+        return this.player.playMusic(command.trim(), false);
       case "play":
         let Sound;
         if (this.player.game.resources === null) {
           Sound = new Audio(
-            "quests/" + this.player.game.name + "/" + command.toString().trim()
+            "quests/" + this.player.game.name + "/" + command.trim()
           );
         } else {
-          Sound = new Audio(this.player.game.resources[command.toString().trim()]);
+          Sound = new Audio(this.player.game.resources[command.trim()]);
         }
 
         Sound.volume = this.player.client.getVolume();
@@ -114,21 +114,21 @@ export default class Parser {
       case "forget_procs":
         return this.player.forgetProcs();
       case "proc":
-        return this.player.proc(command.toString().trim());
+        return this.player.proc(command.trim());
       case "end":
         return this.player.end();
       case "anykey":
-        return this.player.anykey(command.toString().trim());
+        return this.player.anykey(command.trim());
       case "pause":
         return this.player.pause(parseInt(command));
       case "input":
-        return this.player.input(command.toString().trim());
+        return this.player.input(command.trim());
       case "quit":
         return this.player.quit();
       case "invkill":
         return this.player.invkill(
-          command.toString().trim().length > 0
-            ? command.toString().trim()
+          command.trim().length > 0
+            ? command.trim()
             : null
         );
       case "perkill":
@@ -158,7 +158,7 @@ export default class Parser {
 
         return this.player.invAdd(itemAdd.trim(), quantityAdd);
       case "goto":
-        return this.player.goto(command.toString().trim(), gotoType.GOTO);
+        return this.player.goto(command.trim(), gotoType.GOTO);
       case "p":
       case "print":
         return this.player.print(this.openLinks(command), false);

@@ -22,14 +22,18 @@ export default class Expression {
   }
 
   protected toRPN() : any[] {
-      let exitStack: any[] = [];
-      let operStack: any[] = [];
+      const exitStack: any[] = [];
+      const operStack: any[] = [];
       let lastTokenIsOperator = true;
 
       for (let i = 0; i < this.expr.length; i++) {
           let token = this.expr[i].trim();
 
-          if (token.length === 0) continue;
+          if (token.length === 0) {
+              continue;
+          }
+
+          const preparedToken = token.replace(",", ".").replace(/ /g, "");
 
           // если отрицательное число
           if (lastTokenIsOperator && token === "-") {
@@ -38,12 +42,12 @@ export default class Expression {
               } while (token.length === 0);
 
               exitStack.push([
-                  -parseFloat(token.replace(",", ".").replace(/ /g, ""))
+                  -parseFloat(preparedToken)
               ]);
               // если число
-          } else if (!isNaN(token.replace(",", ".").replace(/ /g, "") as any)) {
+          } else if (!isNaN(preparedToken as any)) {
               // считываем всё число дальше
-              exitStack.push([parseFloat(token.replace(",", ".").replace(/ /g, ""))]);
+              exitStack.push([parseFloat(preparedToken)]);
           } else if (Expression.getPriority(token) > 0) {
               if (token === "(") {
                   operStack.push(token);
@@ -58,7 +62,9 @@ export default class Expression {
                       Expression.getPriority(token) <=
                       Expression.getPriority(operStack[operStack.length - 1])
                       ) {
-                      if (operStack.length === 0) break;
+                      if (operStack.length === 0) {
+                          break;
+                      }
                       exitStack.push(operStack.pop());
                   }
 
@@ -68,7 +74,7 @@ export default class Expression {
               let variable = this.game.getVar(token);
 
               if (variable === 0) {
-                  if (token.substr(0, 1) === "'" || token.substr(0, 1) === '"') {
+                  if (token.startsWith("'") || token.startsWith('"')) {
                       if (token.substr(-1, 1) === "'" || token.substr(-1, 1) === '"') {
                           variable = token.substr(1, token.length - 2);
                       }
@@ -95,8 +101,8 @@ export default class Expression {
   }
 
   public calc() : number | boolean | string {
-    let stack: string[] = this.toRPN();
-    let temp : any[] = [];
+    const stack: string[] = this.toRPN();
+    const temp : any[] = [];
 
     for (let i = 0; i < stack.length; i++) {
       let token = stack[i];

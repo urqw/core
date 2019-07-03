@@ -14,7 +14,7 @@ function set() {
     }
 
     // вырезать комментарий
-    if (line.indexOf(";") !== -1) {
+    if (line.includes(";")) {
       line = line.substring(0, line.indexOf(";"));
     }
 

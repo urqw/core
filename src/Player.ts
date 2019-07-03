@@ -1,6 +1,6 @@
 import Parser from "./Parser";
 import Client from "./Client";
-import {dosColorToHex} from "./tools";
+import {dosColorToHex, intColorToRgb} from "./tools";
 import Game, {ItemInterface, VarInterface} from "./Game";
 import ModeUrqRip from "./modes/urqrip";
 import ModeUrqDos from "./modes/urqdos";
@@ -451,18 +451,14 @@ export default class Player {
     }
 
     public print(text: string, ln: boolean): void {
-        let color : string | number = this.game.getVar('style_textcolor');
+        const color : string | number = this.game.getVar('style_textcolor');
 
         let textColor : string = '';
 
         if (typeof color === 'string') {
             textColor = color;
         } else if (color > 0) {
-            const red = (color >> 16) & 0xff;
-            const green = (color >> 8) & 0xff;
-            const blue = color & 0xff;
-
-            textColor = `rgb(${blue}, ${green}, ${red})`;
+            textColor = intColorToRgb(color);
         }
 
         this._text.push({

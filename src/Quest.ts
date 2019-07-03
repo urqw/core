@@ -32,16 +32,16 @@ export default class Quest {
         for (let i = this.quest.length - 1; i >= 0; i--) {
             const line = this.get(i)!;
 
-            if (line.substr(0, 1) === "_" && line.substr(1, 1) !== "_") {
+            if (line.startsWith("_") && line.substr(1, 1) !== "_") {
                 this.quest[i - 1] = this.quest[i - 1] + line.substr(1);
                 this.quest[i] = "";
-            } else if (line.substr(0, 1) === ":") {
+            } else if (line.startsWith(":")) {
                 label = line
                     .substr(1)
                     .toLowerCase()
                     .trim();
 
-                if (line.substr(0, 5).toLowerCase() === ":use_") {
+                if (line.toLowerCase().startsWith(":use_")) {
                     this.useLabels[label] = i;
                 }
 

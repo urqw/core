@@ -10,7 +10,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "outDir": "./dist/",
-    "module": "es2015",
+    "module": "commonjs",
     "moduleResolution": "node",
     "target": "es5"
   },

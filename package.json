@@ -5,7 +5,7 @@
   "main": "dist/Client.js",
   "scripts": {
     "build": "tsc --declaration --sourceMap",
-    "prepublish": "npm test && npm run build",
+    "prepublishOnly": "npm test && npm run build",
     "test": "ava"
   },
   "repository": {
@@ -18,20 +18,19 @@
     "url": "https://github.com/urqw/core/issues"
   },
   "homepage": "https://github.com/urqw/core#readme",
-
   "ava": {
     "compileEnhancements": false,
-    "extensions": ["ts"],
+    "extensions": [
+      "ts"
+    ],
     "require": [
       "ts-node/register"
     ]
   },
-
   "devDependencies": {
-    "typescript": "^3.5.2"
-  },
-  "dependencies": {
+    "typescript": "^3.5.2",
     "ava": "^2.1.0",
     "ts-node": "^8.3.0"
-  }
+  },
+  "dependencies": {}
 }

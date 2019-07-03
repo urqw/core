@@ -8,11 +8,11 @@ export default class Client {
     /**
      * проигрыватель
      */
-    protected Player: Player;
+    protected player: Player;
     /**
      * инстанс игры
      */
-    protected Game: Game;
+    protected game: Game;
 
     protected text: contentInterface[] = [];
 
@@ -24,9 +24,9 @@ export default class Client {
     };
 
     constructor(GameInstance: Game) {
-        this.Game = GameInstance;
-        this.Player = new Player(this.Game, this);
-        this.Player.continue()
+        this.game = GameInstance;
+        this.player = new Player(this.game, this);
+        this.player.continue()
     }
 
     /**
@@ -51,22 +51,22 @@ export default class Client {
      * btn
      */
     public btnClick(action: number): void {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return;
         }
 
-        this.Player.action(action);
+        this.player.action(action);
     }
 
     /**
      * link
      */
     public linkClick(action: number): void {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return;
         }
 
-        this.Player.action(action, true);
+        this.player.action(action, true);
     }
 
     /**
@@ -74,7 +74,7 @@ export default class Client {
      */
     public anykeyDone(keyCode: string): void {
         if (this.isStatusAnykey()) {
-            this.Player.anykeyAction(keyCode);
+            this.player.anykeyAction(keyCode);
         }
 
         return;
@@ -85,7 +85,7 @@ export default class Client {
      */
     public inputDone(text: string) {
         if (this.isStatusInput()) {
-            return this.Player.inputAction(text);
+            return this.player.inputAction(text);
         }
 
         return false;
@@ -93,11 +93,11 @@ export default class Client {
 
 
     public isStatusInput(): boolean {
-        return this.Player.getStatus() === status.INPUT;
+        return this.player.getStatus() === status.INPUT;
     }
 
     public isStatusAnykey(): boolean {
-        return this.Player.getStatus() === status.ANYKEY;
+        return this.player.getStatus() === status.ANYKEY;
     }
 
     public getVolume(): number {
@@ -110,23 +110,23 @@ export default class Client {
     }
 
     public getGameName(): string {
-        return this.Game.name;
+        return this.game.name;
     }
 
     public saveGame(): savedGameInterface | null {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return null;
         }
 
-        return this.Player.save();
+        return this.player.save();
     }
 
     public loadGame(data: savedGameInterface): boolean {
-        if (this.Game.isLocked()) {
+        if (this.game.isLocked()) {
             return false;
         }
 
-        this.Player.load(data);
+        this.player.load(data);
 
         this.render();
 
@@ -134,13 +134,13 @@ export default class Client {
     }
 
     public restartGame(): Client | null {
-        if (this.Player.getStatus() === status.NEXT) {
+        if (this.player.getStatus() === status.NEXT) {
             return null;
         }
 
-        this.Player.restart();
+        this.player.restart();
 
-        return new Client(this.Game);
+        return new Client(this.game);
     }
 
     public static getLineBreakSymbol() {
@@ -168,11 +168,11 @@ export default class Client {
     }
 
     protected setBackColor(): void {
-        let styleBackcolor : string | number = this.Game.getVar('style_backcolor');
+        let styleBackcolor : string | number = this.game.getVar('style_backcolor');
 
         if (typeof styleBackcolor === 'string') {
             this.style.backgroundColor = styleBackcolor;
-        } else if (this.Game.getVar('style_backcolor') > 0) {
+        } else if (this.game.getVar('style_backcolor') > 0) {
             let red = (styleBackcolor >> 16) & 0xFF;
             let green = (styleBackcolor >> 8) & 0xFF;
             let blue = styleBackcolor & 0xFF;
@@ -186,7 +186,7 @@ export default class Client {
      */
     public render(): void {
         // костыли для <img> тега
-        let text = this.Player.text;
+        let text = this.player.text;
         for (let i = 0; i < text.length; i++) {
             if (text[i].text !== undefined) {
                 let regex = /(<img[^>]+src=")([^">]+)"/i;
@@ -195,7 +195,7 @@ export default class Client {
                     if (src !== null) {
                         text[i].text = text[i].text!.replace(
                             /(<img[^>]+src=")([^">]+)"/gi,
-                            '$1' + this.Game.resources[src[2]] + "\""
+                            '$1' + this.game.resources[src[2]] + "\""
                         );
 
                     }
@@ -204,7 +204,7 @@ export default class Client {
         }
 
         this.text = text;
-        this.buttons = this.Player.buttons;
+        this.buttons = this.player.buttons;
         this.setBackColor();
     }
 }

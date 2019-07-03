@@ -3,10 +3,10 @@ import Game from "./Game";
 export default class Expression {
 
   protected expr : string[] = [];
-  protected Game : Game;
+  protected game : Game;
 
   constructor (Game : Game) {
-    this.Game = Game;
+    this.game = Game;
   }
 
     /**
@@ -65,7 +65,7 @@ export default class Expression {
                   operStack.push(token);
               }
           } else {
-              let variable = this.Game.getVar(token);
+              let variable = this.game.getVar(token);
 
               if (variable === 0) {
                   if (token.substr(0, 1) === "'" || token.substr(0, 1) === '"') {

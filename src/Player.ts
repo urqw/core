@@ -61,9 +61,9 @@ export default class Player {
         return this._buttons;
     }
 
-    public Client: Client;
-    public Game: Game;
-    protected Parser: Parser;
+    public client: Client;
+    public game: Game;
+    protected parser: Parser;
 
     private _text: contentInterface[] = [];
     private _buttons: buttonInterface[] = [];
@@ -81,20 +81,20 @@ export default class Player {
     constructor(Game: Game, Client: Client) {
         this.flowStack[this.flow] = [];
 
-        this.Game = Game;
+        this.game = Game;
         this.restart();
-        this.Client = Client;
-        this.Parser = new Parser(this, this.Game);
+        this.client = Client;
+        this.parser = new Parser(this, this.game);
     }
 
     /**
      * перезапуск
      */
     public restart(): void {
-        this.Game.clean();
+        this.game.clean();
 
-        this.Game.setVar("current_loc", this.Game.Quest.firstLabel);
-        this.Game.setVar("previous_loc", this.Game.Quest.firstLabel);
+        this.game.setVar("current_loc", this.game.quest.firstLabel);
+        this.game.setVar("previous_loc", this.game.quest.firstLabel);
     }
 
     public continue(): void {
@@ -107,27 +107,27 @@ export default class Player {
      * рендер
      */
     protected fin(): void {
-        if (this.Game.getVar("music")) {
-            this.playMusic(String(this.Game.getVar("music")), true);
+        if (this.game.getVar("music")) {
+            this.playMusic(String(this.game.getVar("music")), true);
         }
 
         if (this.status !== status.NEXT) {
-            this.Client.render();
+            this.client.render();
         }
 
-        this.Game.setLocked(!(
+        this.game.setLocked(!(
             this.status === status.END ||
             this.status === status.PAUSE
         ));
     }
 
     public play(line: string | null = null): void {
-        this.Game.setLocked();
+        this.game.setLocked();
 
         this.status = status.NEXT;
 
         if (line !== null) {
-            this.Parser.parse(line);
+            this.parser.parse(line);
         }
 
         while (this.status === status.NEXT) {
@@ -135,11 +135,11 @@ export default class Player {
                 this.flowStack[this.flow].length === 0 &&
                 (line = this.next()) !== null
             ) {
-                this.Parser.parse(line);
+                this.parser.parse(line);
             }
 
             while (this.flowStack[this.flow].length > 0 && this.status === status.NEXT) {
-                this.Parser.parse(this.flowStack[this.flow].pop()!); // todo !
+                this.parser.parse(this.flowStack[this.flow].pop()!); // todo !
             }
         }
     }
@@ -148,9 +148,9 @@ export default class Player {
      * следующая строка
      */
     public next(): string | null {
-        let line = this.Game.Quest.get(this.Game.position);
+        let line = this.game.quest.get(this.game.position);
 
-        this.Game.position++;
+        this.game.position++;
 
         if (line === null) {
             return null;
@@ -173,8 +173,8 @@ export default class Player {
     public common(): void {
         let commonLabel = "common";
 
-        if (this.Game.getVar("common") !== 0) {
-            commonLabel = commonLabel + "_" + this.Game.getVar("common");
+        if (this.game.getVar("common") !== 0) {
+            commonLabel = commonLabel + "_" + this.game.getVar("common");
         }
 
         if (this.proc(commonLabel)) {
@@ -203,7 +203,7 @@ export default class Player {
             return;
         }
 
-        let labelPosition: number | null = this.Game.Quest.getLabelPosition(label);
+        let labelPosition: number | null = this.game.quest.getLabelPosition(label);
 
         if (labelPosition === null) {
             this.xbtnAction(label);
@@ -236,14 +236,14 @@ export default class Player {
 
     public anykeyAction(keycode: string): void {
         if (this.inf.length > 0) {
-            this.Game.setVar(this.inf, keycode);
+            this.game.setVar(this.inf, keycode);
         }
 
         this.continue();
     }
 
     public inputAction(value: string): void {
-        this.Game.setVar(this.inf, value);
+        this.game.setVar(this.inf, value);
 
         this.continue();
     }
@@ -252,16 +252,16 @@ export default class Player {
         variable = variable.trim();
 
         if (variable.toLowerCase() === "style_dos_textcolor") {
-            this.Game.setVar("style_textcolor", dosColorToHex(+value)); // todo +
+            this.game.setVar("style_textcolor", dosColorToHex(+value)); // todo +
         } else if (variable.toLowerCase() === "image") {
             let file : string = String(value);
-            if (this.Game.resources != null) {
-                if (this.Game.resources[file] !== undefined) {
-                } else if (this.Game.resources[file + ".png"] !== undefined) {
+            if (this.game.resources != null) {
+                if (this.game.resources[file] !== undefined) {
+                } else if (this.game.resources[file + ".png"] !== undefined) {
                     file = file + ".png";
-                } else if (this.Game.resources[file + ".jpg"] !== undefined) {
+                } else if (this.game.resources[file + ".jpg"] !== undefined) {
                     file = file + ".jpg";
-                } else if (this.Game.resources[file + ".gif"] !== undefined) {
+                } else if (this.game.resources[file + ".gif"] !== undefined) {
                     file = file + ".gif";
                 }
             }
@@ -269,13 +269,13 @@ export default class Player {
             this.image(file);
         }
 
-        this.Game.setVar(variable, value);
+        this.game.setVar(variable, value);
     }
 
     public image(src: string): void {
-        if (src && this.Game.resources[src]) {
+        if (src && this.game.resources[src]) {
             this._text.push({
-                img: this.Game.resources[src]
+                img: this.game.resources[src]
             });
         }
     }
@@ -283,10 +283,10 @@ export default class Player {
     public playMusic(src: string, loop: boolean): void {
         let file : string;
 
-        if (this.Game.resources === null) {
-            file = "quests/" + this.Game.name + "/" + src;
+        if (this.game.resources === null) {
+            file = "quests/" + this.game.name + "/" + src;
         } else {
-            file = this.Game.resources[src];
+            file = this.game.resources[src];
         }
 
         if (src) {
@@ -315,24 +315,24 @@ export default class Player {
      * прыгнуть на метку
      */
     public goto(labelName: string, type: gotoType): boolean {
-        let labelPosition: number | null = this.Game.Quest.getLabelPosition(labelName);
+        let labelPosition: number | null = this.game.quest.getLabelPosition(labelName);
 
         if (labelPosition === null) {
             return false;
         }
 
         if (type === gotoType.BTN || type === gotoType.GOTO) {
-            this.Game.setVar("previous_loc", this.Game.getVar("current_loc"));
-            this.Game.setVar("current_loc", labelName);
+            this.game.setVar("previous_loc", this.game.getVar("current_loc"));
+            this.game.setVar("current_loc", labelName);
         }
 
         if (type === gotoType.BTN || type === gotoType.GOTO || type === gotoType.PROC) {
-            let labelCounter : number = +this.Game.getVar("count_" + labelName);
+            let labelCounter : number = +this.game.getVar("count_" + labelName);
 
-            this.Game.setVar("count_" + labelName, labelCounter + 1);
+            this.game.setVar("count_" + labelName, labelCounter + 1);
         }
 
-        this.Game.position = labelPosition;
+        this.game.position = labelPosition;
 
         // весь стек что дальше очищается
         this.flowStack[this.flow] = [];
@@ -344,10 +344,10 @@ export default class Player {
      * удаление переменных
      */
     public perkill(): void {
-        this.Game.vars = {};
+        this.game.vars = {};
 
-        for (let key in this.Game.items) {
-            this.Game.setVar(key, this.Game.items[key]);
+        for (let key in this.game.items) {
+            this.game.setVar(key, this.game.items[key]);
         }
     }
 
@@ -356,7 +356,7 @@ export default class Player {
         this._buttons = [];
         this.links = {};
 
-        this.Client.render();
+        this.client.render();
     }
 
     public clsb(): void {
@@ -365,16 +365,16 @@ export default class Player {
 
         this._text = Client.removeLinks(this._text);
 
-        this.Client.render();
+        this.client.render();
     }
 
     public invkill(item : string | null = null): void {
         if (item === null) {
-            for (let key in this.Game.items) {
-                this.Game.setItem(key, 0);
+            for (let key in this.game.items) {
+                this.game.setItem(key, 0);
             }
         } else {
-            this.Game.setItem(item, 0);
+            this.game.setItem(item, 0);
         }
     }
 
@@ -383,7 +383,7 @@ export default class Player {
      */
     public proc(label: string): boolean {
         this.flow++;
-        this.procPosition.push(this.Game.position);
+        this.procPosition.push(this.game.position);
 
         if (this.goto(label, gotoType.PROC)) {
             this.flowStack[this.flow] = [];
@@ -400,7 +400,7 @@ export default class Player {
     public end(): void {
         if (this.procPosition.length > 0) {
             this.flowStack[this.flow].pop();
-            this.Game.position = this.procPosition.pop()!; // todo !
+            this.game.position = this.procPosition.pop()!; // todo !
             this.flow--;
         } else {
             this.flowStack[this.flow] = [];
@@ -443,15 +443,15 @@ export default class Player {
     }
 
     public invRemove(item: string, quantity: number): void {
-        this.Game.removeItem(item, quantity);
+        this.game.removeItem(item, quantity);
     }
 
     public invAdd(item: string, quantity: number): void {
-        this.Game.addItem(item, quantity);
+        this.game.addItem(item, quantity);
     }
 
     public print(text: string, ln: boolean): void {
-        let color : string | number = this.Game.getVar('style_textcolor');
+        let color : string | number = this.game.getVar('style_textcolor');
 
         let textColor : string = '';
 
@@ -502,9 +502,9 @@ export default class Player {
             status: this.getStatus(),
             text: this._text,
             buttons: this._buttons,
-            items: this.Game.items,
-            vars: this.Game.vars,
-            position: this.Game.position,
+            items: this.game.items,
+            vars: this.game.vars,
+            position: this.game.position,
         };
     }
 
@@ -515,9 +515,9 @@ export default class Player {
         this.status = data.status;
         this._text = data.text;
         this._buttons = data.buttons;
-        this.Game.items = data.items;
-        this.Game.vars = data.vars;
-        this.Game.position = data.position;
+        this.game.items = data.items;
+        this.game.vars = data.vars;
+        this.game.position = data.position;
     }
 
     public setMode(mode: string): void {

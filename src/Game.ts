@@ -57,8 +57,8 @@ export default class Game {
         this._items = value;
     }
 
-    get Quest(): Quest {
-        return this._Quest;
+    get quest(): Quest {
+        return this._quest;
     }
 
     get name(): string {
@@ -162,13 +162,13 @@ export default class Game {
     /**
      * хранилище файла квеста
      */
-    private _Quest: Quest;
+    private _quest: Quest;
 
     private _position: number = 0;
 
     constructor(name: string, qst: string) {
         this._name = name;
-        this._Quest = new Quest(qst);
+        this._quest = new Quest(qst);
 
         this.clean();
     }
@@ -277,8 +277,8 @@ export default class Game {
             this.systemVars[key].value = this.systemVars[key].defaultValue;
         }
 
-        this.setVar("current_loc", this._Quest.firstLabel);
-        this.setVar("previous_loc", this._Quest.firstLabel);
+        this.setVar("current_loc", this._quest.firstLabel);
+        this.setVar("previous_loc", this._quest.firstLabel);
     }
 
     public isLocked(): boolean {

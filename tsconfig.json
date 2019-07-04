@@ -9,8 +9,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
 
-    "outDir": "./dist/",
-    "module": "commonjs",
+    "outFile": "./dist/core.js",
+    "module": "amd",
     "moduleResolution": "node",
     "target": "es5"
   },

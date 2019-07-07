@@ -76,7 +76,6 @@ export default class Player {
 
     protected status: status = status.NEXT;
     protected inf: string = '';
-    protected timer: number = 0; //todo
 
     protected procPosition: number[] = [];
 
@@ -454,13 +453,12 @@ export default class Player {
     }
 
     public pause(milliseconds: number): void {
-        if (this.timer !== null) {
-            clearTimeout(this.timer);
+        if (this.client.isTimer()) {
+            this.client.removeTimer();
         }
         this.status = status.PAUSE;
 
-        // todo window.setTimeout
-        this.timer = window.setTimeout(() => {
+        this.client.setTimer(() => {
             if (this.status === status.PAUSE) {
                 this.continue();
             }

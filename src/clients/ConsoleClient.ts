@@ -54,4 +54,18 @@ export default class ConsoleClient extends Client {
         this._buttons = this.player.buttons;
         this._links = this.player.links;
     }
+
+    // todo not implemented yet
+    isTimer(): boolean {
+        return false;
+    }
+
+    // todo not implemented yet
+    removeTimer(): void {
+    }
+
+    // todo not implemented yet
+    // @ts-ignore
+    setTimer(callback: () => void, milliseconds: number): void {
+    }
 }

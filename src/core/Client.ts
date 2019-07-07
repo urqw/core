@@ -125,9 +125,7 @@ export default abstract class Client implements ClientInterface{
         return true;
     }
 
-    public getLineBreakSymbol() : string {
-        return "\n";
-    }
+    abstract getLineBreakSymbol() : string;
 
     abstract generateLink(text: string, action: number): string;
 
@@ -141,4 +139,8 @@ export default abstract class Client implements ClientInterface{
         this._links = this.player.links;
         this._buttons = this.player.buttons;
     }
+
+    abstract isTimer() : boolean;
+    abstract removeTimer() : void;
+    abstract setTimer(callback: () => void, milliseconds : number) : void;
 }

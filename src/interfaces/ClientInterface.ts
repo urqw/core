@@ -12,6 +12,10 @@ export interface ClientInterface {
 
     readonly links: LinkInterface;
 
+    isTimer() : boolean;
+    removeTimer() : void;
+    setTimer(callback: () => void, milliseconds : number) : void;
+
     /**
      * "закрыть" игру
      */

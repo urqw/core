@@ -15,6 +15,8 @@ export default class WebClient extends Client implements MediaClientInterface{
         return this._style;
     }
 
+    protected timer : number = 0;
+
     public gameMusic = new Audio();
     protected volume: number = 1;
 
@@ -131,4 +133,16 @@ export default class WebClient extends Client implements MediaClientInterface{
     public getNewSound(src: string): HTMLAudioElement {
         return new Audio(src);
     }
+
+    public isTimer() : boolean {
+        return this.timer !== null;
+    };
+
+    public removeTimer() : void {
+        clearTimeout(this.timer)
+    };
+
+    public setTimer(callback: () => void, milliseconds : number) : void {
+        this.timer = window.setTimeout(callback, milliseconds);
+    };
 }

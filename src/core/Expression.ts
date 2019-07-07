@@ -100,7 +100,7 @@ export default class Expression {
     return this;
   }
 
-  public calc() : number | boolean | string {
+  public calc() : number | string {
     const stack: string[] = this.toRPN();
     const temp : any[] = [];
 
@@ -108,12 +108,12 @@ export default class Expression {
       let token = stack[i];
 
       if (Expression.getPriority(token) > 0) {
-        let result;
+        let result : number | string = 0;
 
         if (/*token == '!' ||*/ token === "not") {
           let variable = temp.pop();
 
-          result = !(variable == true || variable > 0);
+          result = Number(!(variable == true || variable > 0));
         } else {
           let a = temp.pop();
           let b = temp.pop();
@@ -142,46 +142,46 @@ export default class Expression {
                     "$",
                     "i"
                 );
-                result = b.search(reg) != -1;
+                result = Number(b.search(reg) != -1);
               } else {
-                result = b == a;
+                result = Number(b == a);
               }
               break;
             case "=":
               if (typeof b == "string" && typeof a == "string") {
-                result = b.toLowerCase() == a.toLowerCase();
+                result = Number(b.toLowerCase() == a.toLowerCase());
               } else {
-                result = b == a;
+                result = Number(b == a);
               }
               break;
             case "!=":
             case "<>":
               if (typeof b == "string" && typeof a == "string") {
-                result = b.toLowerCase() != a.toLowerCase();
+                result = Number(b.toLowerCase() != a.toLowerCase());
               } else {
-                result = b != a;
+                result = Number(b != a);
               }
 
               break;
             case ">":
-              result = b > a;
+              result = Number(b > a);
               break;
             case "<":
-              result = b < a;
+              result = Number(b < a);
               break;
             case ">=":
-              result = b >= a;
+              result = Number(b >= a);
               break;
             case "<=":
-              result = b <= a;
+              result = Number(b <= a);
               break;
             case "&&":
             case "and":
-              result = (b == true || b > 0) && (a == true || a > 0);
+              result = Number((b == true || b > 0) && (a == true || a > 0));
               break;
             case "||":
             case "or":
-              result = b == true || b > 0 || (a == true || a > 0);
+              result = Number(b == true || b > 0 || (a == true || a > 0));
               break;
           }
         }

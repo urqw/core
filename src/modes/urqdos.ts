@@ -1,4 +1,4 @@
-import Player, {gotoType} from "../Player";
+import Player, {gotoType} from "../core/Player";
 
 function set() {
   /**

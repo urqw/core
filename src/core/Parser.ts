@@ -1,8 +1,7 @@
 import Expression from "./Expression";
 import Game from "./Game";
-import Client from "./Client";
 import Player, {gotoType} from "./Player";
-import { isFloat } from "./tools";
+import { isFloat } from "../tools";
 
 export default class Parser {
   player : Player;
@@ -95,19 +94,7 @@ export default class Parser {
       case "music":
         return this.player.playMusic(command.trim(), false);
       case "play":
-        let Sound;
-        if (this.player.game.resources === null) {
-          Sound = new Audio(
-            "quests/" + this.player.game.name + "/" + command.trim()
-          );
-        } else {
-          Sound = new Audio(this.player.game.resources[command.trim()]);
-        }
-
-        Sound.volume = this.player.client.getVolume();
-        Sound.play();
-
-        break;
+        return this.player.playSound(command.trim());
       case "clsb":
         return this.player.clsb();
       case "cls":
@@ -252,7 +239,7 @@ export default class Parser {
    * Открываем #$, #%$
    */
   openTags(line : string) : string {
-    const breakSymbol = Client.getLineBreakSymbol();
+    const breakSymbol = this.player.client.getLineBreakSymbol();
     line = line.replace(/#\/\$/g, breakSymbol);
     line = line.replace(/#%\/\$/g, breakSymbol);
     line = line.replace(/#\$/g, " ");

@@ -1,9 +1,11 @@
 import Parser from "./Parser";
 import Client from "./Client";
-import {dosColorToHex, intColorToRgb} from "./tools";
+import {dosColorToHex, intColorToRgb} from "../tools";
 import Game, {ItemInterface, VarInterface} from "./Game";
-import ModeUrqRip from "./modes/urqrip";
-import ModeUrqDos from "./modes/urqdos";
+import ModeUrqRip from "../modes/urqrip";
+import ModeUrqDos from "../modes/urqdos";
+import {ClientInterface} from "../interfaces/ClientInterface";
+import WebClient from "../clients/WebClient";
 
 export enum modes {
     RIPURQ = 'ripurq',
@@ -53,6 +55,9 @@ export interface LinkInterface {
 }
 
 export default class Player {
+    get links(): LinkInterface {
+        return this._links;
+    }
     get text(): ContentInterface[] {
         return this._text;
     }
@@ -61,13 +66,13 @@ export default class Player {
         return this._buttons;
     }
 
-    public client: Client;
+    public client: ClientInterface;
     public game: Game;
     protected parser: Parser;
 
     private _text: ContentInterface[] = [];
     private _buttons: ButtonInterface[] = [];
-    protected links: LinkInterface = {};
+    private _links: LinkInterface = {};
 
     protected status: status = status.NEXT;
     protected inf: string = '';
@@ -186,8 +191,8 @@ export default class Player {
     public action(actionId: number, link: boolean = false): void {
         let label: string | null = null;
         if (link) {
-            label = this.links[actionId];
-            delete this.links[actionId];
+            label = this._links[actionId];
+            delete this._links[actionId];
         } else {
             for (let key in this._buttons) {
                 if (this._buttons[key].id === actionId) {
@@ -281,6 +286,11 @@ export default class Player {
     }
 
     public playMusic(src: string, loop: boolean): void {
+        // todo это что-то вроде детекта имплемента MediaClientInterface
+        if ((this.client as WebClient).gameMusic === undefined) {
+            return;
+        }
+
         let file : string;
 
         if (this.game.resources === null) {
@@ -289,26 +299,50 @@ export default class Player {
             file = this.game.resources[src];
         }
 
+        // todo костыли TS, не примает интерфейс
+        const gameMusic = (this.client as WebClient).gameMusic;
+
         if (src) {
-            if (Client.gameMusic.getAttribute("src") !== file) {
-                Client.gameMusic.src = file;
+            if (gameMusic.getAttribute("src") !== file) {
+                gameMusic.src = file;
 
                 if (loop) {
-                    Client.gameMusic.addEventListener(
+                    gameMusic.addEventListener(
                         "ended",
-                        function () {
-                            Client.gameMusic.src = file;
-                            Client.gameMusic.play();
+                        () => {
+                            gameMusic.src = file;
+                            gameMusic.play();
                         },
                         false
                     );
                 }
 
-                Client.gameMusic.play();
+                gameMusic.play();
             }
         } else {
-            Client.gameMusic.pause();
+            gameMusic.pause();
         }
+    }
+
+    public playSound(src: string): void {
+        // todo это что-то вроде детекта имплемента MediaClientInterface
+        if ((this.client as WebClient).gameMusic === undefined) {
+            return;
+        }
+
+        let source;
+        if (this.game.resources === null) {
+            source = "quests/" + this.game.name + "/" + src;
+        } else {
+            source = this.game.resources[src];
+        }
+
+        // todo костыли TS, не примает интерфейс
+        let Sound = (this.client as WebClient).getNewSound(source);
+
+        // todo костыли TS, не примает интерфейс
+        Sound.volume = (this.client as WebClient).getVolume();
+        Sound.play();
     }
 
     /**
@@ -354,16 +388,16 @@ export default class Player {
     public cls(): void {
         this._text = [];
         this._buttons = [];
-        this.links = {};
+        this._links = {};
 
         this.client.render();
     }
 
     public clsb(): void {
         this._buttons = [];
-        this.links = {};
+        this._links = {};
 
-        this._text = Client.removeLinks(this._text);
+        this._text = this.client.removeLinks(this._text);
 
         this.client.render();
     }
@@ -479,11 +513,11 @@ export default class Player {
     }
 
     public link(text: string, command: string): string {
-        let id: number = Object.keys(this.links).length;
+        let id: number = Object.keys(this._links).length;
 
-        this.links[id] = command;
+        this._links[id] = command;
 
-        return Client.generateLink(text, id);
+        return this.client.generateLink(text, id);
     }
 
     public getStatus(): status {

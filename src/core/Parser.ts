@@ -92,7 +92,7 @@ export default class Parser {
       case "image":
         return this.player.image(command.trim());
       case "music":
-        return this.player.playMusic(command.trim(), false);
+        return this.player.playMusic(command.trim());
       case "play":
         return this.player.playSound(command.trim());
       case "clsb":

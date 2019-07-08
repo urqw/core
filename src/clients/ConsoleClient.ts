@@ -1,34 +1,12 @@
 import Client from "../core/Client";
 import {ContentInterface, status} from "../core/Player";
-import Game from "../core/Game";
-import {ClientInterface} from "../interfaces/ClientInterface";
 
 export default class ConsoleClient extends Client {
-    /**
-     * инстанс новой игры
-     */
-    public static createGame(questname: string, quest: string, mode: string = "urqw"): ClientInterface {
-        const GameInstance : Game = new Game(questname, quest);
-        GameInstance.setVar("urq_mode", mode);
-
-        return new this(GameInstance);
-    }
-
     /**
      * "закрыть" игру
      */
     public close(): boolean {
         return this.player.getStatus() !== status.NEXT;
-    }
-
-    public restartGame(): ConsoleClient | null {
-        if (this.close()) {
-            this.player.restart();
-
-            return new ConsoleClient(this.game);
-        }
-
-        return null;
     }
 
     public getLineBreakSymbol() {

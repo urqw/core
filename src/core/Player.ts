@@ -1,9 +1,7 @@
 import Parser from "./Parser";
 import Client from "./Client";
-import {dosColorToHex, intColorToRgb} from "../tools";
+import {intColorToRgb} from "../tools";
 import Game, {ItemInterface, VarInterface} from "./Game";
-import ModeUrqRip from "../modes/urqrip";
-import ModeUrqDos from "../modes/urqdos";
 import {ClientInterface} from "../interfaces/ClientInterface";
 import WebClient from "../clients/WebClient";
 
@@ -86,19 +84,8 @@ export default class Player {
         this.flowStack[this.flow] = [];
 
         this.game = Game;
-        this.restart();
         this.client = Client;
         this.parser = new Parser(this, this.game);
-    }
-
-    /**
-     * перезапуск
-     */
-    public restart(): void {
-        this.game.clean();
-
-        this.game.setVar("current_loc", this.game.quest.firstLabel);
-        this.game.setVar("previous_loc", this.game.quest.firstLabel);
     }
 
     public continue(): void {
@@ -111,10 +98,6 @@ export default class Player {
      * рендер
      */
     protected fin(): void {
-        if (this.game.getVar("music")) {
-            this.playMusic(String(this.game.getVar("music")), true);
-        }
-
         if (this.status !== status.NEXT) {
             this.client.render();
         }
@@ -253,26 +236,6 @@ export default class Player {
     }
 
     public setVar(variable: string, value: string | number): void {
-        variable = variable.trim();
-
-        if (variable.toLowerCase() === "style_dos_textcolor") {
-            this.game.setVar("style_textcolor", dosColorToHex(+value)); // todo +
-        } else if (variable.toLowerCase() === "image") {
-            let file : string = String(value);
-            if (this.game.resources != null) {
-                if (this.game.resources[file] !== undefined) {
-                } else if (this.game.resources[file + ".png"] !== undefined) {
-                    file = file + ".png";
-                } else if (this.game.resources[file + ".jpg"] !== undefined) {
-                    file = file + ".jpg";
-                } else if (this.game.resources[file + ".gif"] !== undefined) {
-                    file = file + ".gif";
-                }
-            }
-
-            this.image(file);
-        }
-
         this.game.setVar(variable, value);
     }
 
@@ -284,43 +247,13 @@ export default class Player {
         }
     }
 
-    public playMusic(src: string, loop: boolean): void {
+    public playMusic(src: string): void {
         // todo это что-то вроде детекта имплемента MediaClientInterface
         if ((this.client as WebClient).gameMusic === undefined) {
             return;
         }
 
-        let file : string;
-
-        if (this.game.resources === null) {
-            file = "quests/" + this.game.name + "/" + src;
-        } else {
-            file = this.game.resources[src];
-        }
-
-        // todo костыли TS, не примает интерфейс
-        const gameMusic = (this.client as WebClient).gameMusic;
-
-        if (src) {
-            if (gameMusic.getAttribute("src") !== file) {
-                gameMusic.src = file;
-
-                if (loop) {
-                    gameMusic.addEventListener(
-                        "ended",
-                        () => {
-                            gameMusic.src = file;
-                            gameMusic.play();
-                        },
-                        false
-                    );
-                }
-
-                gameMusic.play();
-            }
-        } else {
-            gameMusic.pause();
-        }
+        (this.client as WebClient).music(src);
     }
 
     public playSound(src: string): void {
@@ -329,19 +262,7 @@ export default class Player {
             return;
         }
 
-        let source;
-        if (this.game.resources === null) {
-            source = "quests/" + this.game.name + "/" + src;
-        } else {
-            source = this.game.resources[src];
-        }
-
-        // todo костыли TS, не примает интерфейс
-        let Sound = (this.client as WebClient).getNewSound(source);
-
-        // todo костыли TS, не примает интерфейс
-        Sound.volume = (this.client as WebClient).getVolume();
-        Sound.play();
+        (this.client as WebClient).sound(src);
     }
 
     /**
@@ -360,7 +281,7 @@ export default class Player {
         }
 
         if (type === gotoType.BTN || type === gotoType.GOTO || type === gotoType.PROC) {
-            let labelCounter : number = +this.game.getVar("count_" + labelName);
+            let labelCounter : number = Number(this.game.getVar("count_" + labelName));
 
             this.game.setVar("count_" + labelName, labelCounter + 1);
         }
@@ -546,16 +467,5 @@ export default class Player {
         this.game.items = data.items;
         this.game.vars = data.vars;
         this.game.position = data.position;
-    }
-
-    public setMode(mode: string): void {
-        if (mode === modes.RIPURQ) {
-            ModeUrqRip();
-        }
-        if (mode === modes.DOSURQ) {
-            ModeUrqDos();
-            this.setVar('style_backcolor', '#000');
-            this.setVar('style_textcolor', '#FFF');
-        }
     }
 }

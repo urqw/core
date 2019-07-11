@@ -1,8 +1,6 @@
-import { intColorToRgb } from "../tools";
+import {intColorToRgb} from "../tools";
 import Client from "../core/Client";
 import {ContentInterface, status} from "../core/Player";
-import Game, {ResourceInterface} from "../core/Game";
-import {ClientInterface} from "../interfaces/ClientInterface";
 import {MediaClientInterface} from "../interfaces/MediaClientInterface";
 
 interface GameStyle {
@@ -10,10 +8,12 @@ interface GameStyle {
     textColor: string
 }
 
-export default class WebClient extends Client implements MediaClientInterface{
+export default class WebClient extends Client implements MediaClientInterface {
     get style(): GameStyle {
         return this._style;
     }
+
+    protected timer: number = 0;
 
     public gameMusic = new Audio();
     protected volume: number = 1;
@@ -22,17 +22,6 @@ export default class WebClient extends Client implements MediaClientInterface{
         backgroundColor: '',
         textColor: '',
     };
-
-    /**
-     * инстанс новой игры
-     */
-    public static createGame(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw"): ClientInterface {
-        const GameInstance : Game = new Game(questname, quest);
-        GameInstance.resources = resources;
-        GameInstance.setVar("urq_mode", mode);
-
-        return new this(GameInstance);
-    }
 
     /**
      * "закрыть" игру
@@ -56,16 +45,6 @@ export default class WebClient extends Client implements MediaClientInterface{
         this.gameMusic.volume = this.volume;
     }
 
-    public restartGame(): WebClient | null {
-        if (this.close()) {
-            this.player.restart();
-
-            return new WebClient(this.game);
-        }
-
-        return null;
-    }
-
     public getLineBreakSymbol() {
         return "<br>";
     }
@@ -78,7 +57,7 @@ export default class WebClient extends Client implements MediaClientInterface{
     }
 
     public removeLinks(text: ContentInterface[]): ContentInterface[] {
-        for (let i : number = 0; i < text.length; i++) {
+        for (let i: number = 0; i < text.length; i++) {
             if (text[i].text !== undefined) {
                 text[i].text = text[i].text!.replace(
                     /<a.+?>(.+?)<\/a>/gi,
@@ -91,7 +70,7 @@ export default class WebClient extends Client implements MediaClientInterface{
     }
 
     protected setBackColor(): void {
-        const styleBackcolor : string | number = this.game.getVar('style_backcolor');
+        const styleBackcolor: string | number = this.game.getVar('style_backcolor');
 
         if (typeof styleBackcolor === 'string') {
             this._style.backgroundColor = styleBackcolor;
@@ -116,7 +95,6 @@ export default class WebClient extends Client implements MediaClientInterface{
                             /(<img[^>]+src=")([^">]+)"/gi,
                             '$1' + this.game.resources[src[2]] + "\""
                         );
-
                     }
                 }
             }
@@ -128,7 +106,59 @@ export default class WebClient extends Client implements MediaClientInterface{
         this.setBackColor();
     }
 
-    public getNewSound(src: string): HTMLAudioElement {
-        return new Audio(src);
+    public isTimer(): boolean {
+        return this.timer !== null;
+    };
+
+    public removeTimer(): void {
+        clearTimeout(this.timer)
+    };
+
+    public setTimer(callback: () => void, milliseconds: number): void {
+        this.timer = window.setTimeout(callback, milliseconds);
+    };
+
+    public music(source: string): void {
+        let file: string;
+
+        if (this.game.resources === null) {
+            file = "quests/" + this.game.name + "/" + source;
+        } else {
+            file = this.game.resources[source];
+        }
+
+        const gameMusic = this.gameMusic;
+
+        if (source) {
+            if (gameMusic.getAttribute("src") !== file) {
+                gameMusic.src = file;
+
+                gameMusic.addEventListener(
+                    "ended",
+                    () => {
+                        gameMusic.src = file;
+                        gameMusic.play();
+                    },
+                    false
+                );
+
+                gameMusic.play();
+            }
+        } else {
+            gameMusic.pause();
+        }
+    }
+
+    public sound(source: string): void {
+        if (this.game.resources === null) {
+            source = "quests/" + this.game.name + "/" + source;
+        } else {
+            source = this.game.resources[source];
+        }
+
+        let Sound = new Audio(source);
+
+        Sound.volume = this.getVolume();
+        Sound.play();
     }
 }

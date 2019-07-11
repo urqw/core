@@ -4,10 +4,13 @@ import Player, {
     ContentInterface, ButtonInterface,
     LinkInterface
 } from "./Player";
-import Game from "./Game";
+import Game, {ResourceInterface} from "./Game";
 import {ClientInterface} from "../interfaces/ClientInterface";
 
 export default abstract class Client implements ClientInterface{
+    get player(): Player {
+        return this._player;
+    }
     get buttons(): ButtonInterface[] {
         return this._buttons;
     }
@@ -23,7 +26,7 @@ export default abstract class Client implements ClientInterface{
     /**
      * проигрыватель
      */
-    protected player: Player;
+    protected _player: Player;
 
     /**
      * инстанс игры
@@ -36,10 +39,14 @@ export default abstract class Client implements ClientInterface{
 
     protected _links: LinkInterface = [];
 
-    protected constructor(gameInstance: Game) {
+    public constructor(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw") {
+        const gameInstance : Game = new Game(questname, quest, this);
+        gameInstance.resources = resources;
+        gameInstance.setVar("urq_mode", mode);
+
         this.game = gameInstance;
-        this.player = new Player(this.game, this);
-        this.player.continue()
+        this._player = new Player(this.game, this);
+        this._player.continue();
     }
 
     /**
@@ -47,7 +54,14 @@ export default abstract class Client implements ClientInterface{
      */
     abstract close(): boolean;
 
-    abstract restartGame(): ClientInterface | null;
+    public restartGame(): void {
+        if (this.close()) {
+            this.game.clean();
+        }
+
+        this._player = new Player(this.game, this);
+        this._player.continue();
+    }
 
     /**
      * btn
@@ -57,7 +71,7 @@ export default abstract class Client implements ClientInterface{
             return;
         }
 
-        this.player.action(action);
+        this._player.action(action);
     }
 
     /**
@@ -68,7 +82,7 @@ export default abstract class Client implements ClientInterface{
             return;
         }
 
-        this.player.action(action, true);
+        this._player.action(action, true);
     }
 
     /**
@@ -76,7 +90,7 @@ export default abstract class Client implements ClientInterface{
      */
     public anykeyDone(keyCode: string): void {
         if (this.isStatusAnykey()) {
-            this.player.anykeyAction(keyCode);
+            this._player.anykeyAction(keyCode);
         }
 
         return;
@@ -87,18 +101,18 @@ export default abstract class Client implements ClientInterface{
      */
     public inputDone(text: string) : void {
         if (this.isStatusInput()) {
-            return this.player.inputAction(text);
+            return this._player.inputAction(text);
         }
 
         return;
     }
 
     public isStatusInput(): boolean {
-        return this.player.getStatus() === status.INPUT;
+        return this._player.getStatus() === status.INPUT;
     }
 
     public isStatusAnykey(): boolean {
-        return this.player.getStatus() === status.ANYKEY;
+        return this._player.getStatus() === status.ANYKEY;
     }
 
     public getGameName(): string {
@@ -110,7 +124,7 @@ export default abstract class Client implements ClientInterface{
             return null;
         }
 
-        return this.player.save();
+        return this._player.save();
     }
 
     public loadGame(data: SavedGameInterface): boolean {
@@ -118,16 +132,14 @@ export default abstract class Client implements ClientInterface{
             return false;
         }
 
-        this.player.load(data);
+        this._player.load(data);
 
         this.render();
 
         return true;
     }
 
-    public getLineBreakSymbol() : string {
-        return "\n";
-    }
+    abstract getLineBreakSymbol() : string;
 
     abstract generateLink(text: string, action: number): string;
 
@@ -137,8 +149,12 @@ export default abstract class Client implements ClientInterface{
      * рендер
      */
     public render(): void {
-        this._text = this.player.text;
-        this._links = this.player.links;
-        this._buttons = this.player.buttons;
+        this._text = this._player.text;
+        this._links = this._player.links;
+        this._buttons = this._player.buttons;
     }
+
+    abstract isTimer() : boolean;
+    abstract removeTimer() : void;
+    abstract setTimer(callback: () => void, milliseconds : number) : void;
 }

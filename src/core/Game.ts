@@ -1,4 +1,9 @@
 import Quest from "./Quest";
+import ModeUrqRip from "../modes/urqrip";
+import ModeUrqDos from "../modes/urqdos";
+import {modes} from "./Player";
+import {ClientInterface} from "../interfaces/ClientInterface";
+import {dosColorToHex} from "../tools";
 
 export interface ItemInterface {
     [key: string]: number
@@ -9,12 +14,10 @@ export interface VarInterface {
 }
 
 export interface SystemVarInterface {
-    [key: string]: {
-        defaultValue : string | number,
-        value : string | number,
-        setCallback : ((value: string | number) => void) | null,
-        getCallback : (() => string | number) | null,
-    }
+    defaultValue: string | number,
+    value: string | number,
+    setCallback: ((value: string | number) => void) | null,
+    getCallback: (() => string | number) | null,
 }
 
 export interface ResourceInterface {
@@ -33,6 +36,8 @@ export default class Game {
         return this._name;
     }
 
+    public client: ClientInterface;
+
     protected locked: boolean = true;
 
     public resources: ResourceInterface = {};
@@ -41,84 +46,136 @@ export default class Game {
 
     public vars: VarInterface = {};
 
-    protected systemVars: SystemVarInterface = {
+    protected systemVars: { [key: string]: SystemVarInterface } = {
         'urq_mode': {
-            'defaultValue' : '',
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': '',
+            'value': '',
+            'setCallback': (value: string | number) => {
+                if (value === modes.RIPURQ) {
+                    ModeUrqRip();
+                }
+                if (value === modes.DOSURQ) {
+                    ModeUrqDos();
+                    this.setVar('style_backcolor', '#000');
+                    this.setVar('style_textcolor', '#FFF');
+                }
+            },
+            'getCallback': null,
         },
         'time': {
-            'defaultValue' : '',
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': '',
+            'value': '',
+            'setCallback': null,
+            'getCallback': () => {
+                const Datetime = new Date();
+                return (
+                    Datetime.getHours() * 3600 +
+                    Datetime.getMinutes() * 60 +
+                    Datetime.getSeconds()
+                );
+            }
         },
         'tokens_delim': {
-            'defaultValue' : ' ,"?!',
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': ' ,"?!',
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
         'music': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': (src: string | number) => {
+                this.client.player.playMusic(String(src));
+            },
+            'getCallback': null,
         },
         'current_loc': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
         'previous_loc': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
-        },
-        'count_': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
         'rnd': {
-            'defaultValue' : '',
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': '',
+            'value': '',
+            'setCallback': null,
+            'getCallback': () => {
+                return Math.random();
+            },
+        },
+        'rnd[0-9+]': {
+            'defaultValue': '',
+            'value': '',
+            'setCallback': null,
+            'getCallback': () => {
+                return Math.floor(Math.random() * Number(this.systemVars['rnd[0-9+]'].value)) + 1
+            },
         },
         'style_textcolor': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
         'style_dos_textcolor': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': (value: string | number) => {
+                this.setVar("style_textcolor", dosColorToHex(Number(value)));
+            },
+            'getCallback': null,
         },
         'style_backcolor': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
         'style_dos_backcolor': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': (value: string | number) => {
+                this.setVar("style_backcolor", dosColorToHex(Number(value)));
+            },
+            'getCallback': null,
+        },
+        'image': {
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': (value: string | number) => {
+                let file: string = String(value);
+                if (this.resources != null) {
+                    if (this.resources[file] !== undefined) {
+                    } else if (this.resources[file + ".png"] !== undefined) {
+                        file = file + ".png";
+                    } else if (this.resources[file + ".jpg"] !== undefined) {
+                        file = file + ".jpg";
+                    } else if (this.resources[file + ".gif"] !== undefined) {
+                        file = file + ".gif";
+                    }
+                }
+
+                this.client.player.image(file);
+            },
+            'getCallback': null,
         },
         'common': {
-            'defaultValue' : 0,
-            'value' : '',
-            'setCallback' : null,
-            'getCallback' : null,
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
+        },
+        'count_[.+]': {
+            'defaultValue': 0,
+            'value': '',
+            'setCallback': null,
+            'getCallback': null,
         },
     };
 
@@ -134,7 +191,8 @@ export default class Game {
 
     public position: number = 0;
 
-    constructor(name: string, qst: string) {
+    constructor(name: string, qst: string, Client: ClientInterface) {
+        this.client = Client;
         this._name = name;
         this._quest = new Quest(qst);
 
@@ -166,10 +224,12 @@ export default class Game {
     public setVar(variable: string, value: string | number) {
         variable = variable.toLowerCase();
 
-        if (this.systemVars[variable] !== undefined) {
-            let callback = this.systemVars[variable].setCallback;
-            if (typeof callback === 'function') {
-                callback(value);
+        let systemVar = this.getSystemVar(variable);
+        if (systemVar !== null) {
+            if (typeof systemVar.setCallback === 'function') {
+                systemVar.setCallback(value);
+            } else {
+                systemVar.value = value;
             }
         } else {
             if (variable.startsWith("inv_")) {
@@ -185,10 +245,12 @@ export default class Game {
     public getVar(variable: string): string | number {
         variable = variable.toLowerCase();
 
-        if (this.systemVars[variable] !== undefined) {
-            let callback = this.systemVars[variable].getCallback;
-            if (typeof callback === 'function') {
-                return callback();
+        let systemVar = this.getSystemVar(variable);
+        if (systemVar !== null) {
+            if (typeof systemVar.getCallback === 'function') {
+                return systemVar.getCallback();
+            } else {
+                return this.systemVars[variable].value;
             }
         }
 
@@ -196,35 +258,21 @@ export default class Game {
             variable = variable.substr(4);
         }
 
-        if (variable === "rnd") {
-            return Math.random();
-        } else if (variable.startsWith("rnd")) {
-            return Math.floor(Math.random() * parseInt(variable.substr(3))) + 1;
-        }
+        /*
 
-        if (variable === "time") {
-            const Datetime = new Date();
-            return (
-                Datetime.getHours() * 3600 +
-                Datetime.getMinutes() * 60 +
-                Datetime.getSeconds()
-            );
-        }
-/*
-
-        // Для выражений вроде "1 деньги"
-        if (variable.split(" ").length > 1) {
-            const count = variable.split(" ")[0];
-            if (!isNaN(count)) {
-                variable = variable
-                    .split(" ")
-                    .slice(1)
-                    .join(" ")
-                    .trim();
-                return this._vars[variable] >= count;
-            }
-        }
-*/
+                // Для выражений вроде "1 деньги"
+                if (variable.split(" ").length > 1) {
+                    const count = variable.split(" ")[0];
+                    if (!isNaN(count)) {
+                        variable = variable
+                            .split(" ")
+                            .slice(1)
+                            .join(" ")
+                            .trim();
+                        return this._vars[variable] >= count;
+                    }
+                }
+        */
 
         if (this.vars[variable] !== undefined) {
             return this.vars[variable];
@@ -241,12 +289,7 @@ export default class Game {
         this.items = {};
         this.vars = {};
 
-        for (let key in this.systemVars) {
-            this.systemVars[key].value = this.systemVars[key].defaultValue;
-        }
-
-        this.setVar("current_loc", this._quest.firstLabel);
-        this.setVar("previous_loc", this._quest.firstLabel);
+        this.resetSystemVars();
     }
 
     public isLocked(): boolean {
@@ -255,5 +298,29 @@ export default class Game {
 
     public setLocked(locked: boolean = true): void {
         this.locked = locked;
+    }
+
+    protected getSystemVar(variable: string): SystemVarInterface | null {
+        if (this.systemVars[variable] !== undefined) {
+            return this.systemVars[variable];
+        }
+
+        const regex = /rnd([0-9+])/i;
+        const result = variable.match(regex);
+        if (result !== null) {
+            this.systemVars['rnd[0-9+]'].value = result[1];
+            return this.systemVars['rnd[0-9+]'];
+        }
+
+        return null;
+    }
+
+    protected resetSystemVars(): void {
+        for (let key in this.systemVars) {
+            this.systemVars[key].value = this.systemVars[key].defaultValue;
+        }
+
+        this.systemVars["current_loc"].value = this._quest.firstLabel;
+        this.systemVars["previous_loc"].value = this._quest.firstLabel;
     }
 }

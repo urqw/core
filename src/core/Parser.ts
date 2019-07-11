@@ -51,7 +51,7 @@ export default class Parser {
 
       let conditionResult = this.expression.setExpression(this.openTags(cond)).calc();
 
-      if (conditionResult === true || conditionResult > 0) {
+      if (conditionResult) {
         this.parse(then);
       } else if (els !== null) {
           this.parse(els);
@@ -92,7 +92,7 @@ export default class Parser {
       case "image":
         return this.player.image(command.trim());
       case "music":
-        return this.player.playMusic(command.trim(), false);
+        return this.player.playMusic(command.trim());
       case "play":
         return this.player.playSound(command.trim());
       case "clsb":
@@ -195,8 +195,8 @@ export default class Parser {
 
         if (line.indexOf("=") > 0) {
           this.player.setVar(
-            line.substring(0, line.indexOf("=")).trim(),
-              String(this.expression.setExpression("'" + line.substr(line.indexOf("=") + 1) + "'").calc())
+              line.substring(0, line.indexOf("=")).trim(),
+              this.expression.setExpression("'" + line.substr(line.indexOf("=") + 1) + "'").calc()
           );
         }
 
@@ -209,7 +209,7 @@ export default class Parser {
           if (line.indexOf("=") > 0) {
               this.player.setVar(
                   line.substring(0, line.indexOf("=")).trim(),
-                  String(this.expression.setExpression(line.substr(line.indexOf("=") + 1)).calc())
+                  this.expression.setExpression(line.substr(line.indexOf("=") + 1)).calc()
               );
         } else {
           console.log("Unknown operand: " + operand + " ignored (line: " + line + ")");
@@ -251,7 +251,7 @@ export default class Parser {
     });
 
     while (line.search(/#[^#]+?\$/) !== -1) {
-      line = line.replace(/#[^#]+?\$/, (exp : string) : string => {
+      line = line.replace(/#[^#]+?\$/, (exp : string) : any => {
         // рудимент для совместимости
         if (exp[1] === "%") {
           exp = exp.substr(2, exp.length - 3);
@@ -260,7 +260,7 @@ export default class Parser {
         }
         const result = this.expression.setExpression(exp).calc();
 
-        return String(isFloat(result) ? Number(result).toFixed(2) : result);
+        return isFloat(result) ? Math.round(result as number * 100) / 100 : result;
       });
     }
 

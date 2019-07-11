@@ -53,7 +53,7 @@ function set() {
     }
 
     if (type === gotoType.BTN || type === gotoType.GOTO || type === gotoType.PROC) {
-      let labelCounter : number = +this.game.getVar(labelName);
+      let labelCounter : number = Number(this.game.getVar(labelName));
 
       this.game.setVar(labelName, labelCounter + 1);
     }

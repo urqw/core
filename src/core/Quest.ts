@@ -53,7 +53,7 @@ export default class Quest {
     }
 
     public getLabelPosition(label: string): number | null {
-        label = label.toString().toLowerCase();
+        label = label.toLowerCase();
 
         if (this.labels[label] === undefined) {
             return null;

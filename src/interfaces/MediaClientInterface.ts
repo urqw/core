@@ -6,5 +6,7 @@ export interface MediaClientInterface {
 
     setVolume(volume: number): void;
 
-    getNewSound(src: string): HTMLAudioElement;
+    music(src: string): void;
+
+    sound(src: string): void;
 }

@@ -1,4 +1,4 @@
-import {
+import Player, {
     SavedGameInterface,
     ContentInterface, ButtonInterface,
     LinkInterface
@@ -11,6 +11,8 @@ export interface ClientInterface {
     readonly text: ContentInterface[];
 
     readonly links: LinkInterface;
+
+    readonly player: Player;
 
     isTimer() : boolean;
     removeTimer() : void;
@@ -51,7 +53,7 @@ export interface ClientInterface {
 
     loadGame(data: SavedGameInterface): boolean;
 
-    restartGame(): ClientInterface | null;
+    restartGame(): void;
 
     getLineBreakSymbol(): string;
 

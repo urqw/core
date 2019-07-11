@@ -10,7 +10,7 @@ test('set string value, get string value, btn', (t) => {
     end
     `;
 
-    const client = ConsoleClient.createGame('test', fixture);
+    const client = new ConsoleClient('test', fixture, {});
 
     t.is(client.text.length, 1);
     t.is(client.text[0].text, "строка");
@@ -31,7 +31,7 @@ test('set number value, get number value, btn', (t) => {
     end
     `;
 
-    const client = ConsoleClient.createGame('test', fixture);
+    const client = new ConsoleClient('test', fixture, {});
 
     t.is(client.text.length, 1);
     t.is(client.text[0].text, "1.5");
@@ -50,7 +50,7 @@ test('if then, & in if', (t) => {
     end
     `;
 
-    const client = ConsoleClient.createGame('test', fixture);
+    const client = new ConsoleClient('test', fixture, {});
 
     t.is(client.text.length, 1);
     t.is(client.text[0].text, "Из дверей вышел поросёнок - друг медвежонка.");
@@ -72,7 +72,7 @@ test('if then else, & in else', (t) => {
     end
     `;
 
-    const client = ConsoleClient.createGame('test', fixture);
+    const client = new ConsoleClient('test', fixture, {});
 
     t.is(client.text[0].text, "Из дверей вышел поросёнок - друг медвежонка.");
     t.is(client.buttons[0].desc, "Осмотреть Пятачка");

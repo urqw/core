@@ -2,6 +2,7 @@ import {intColorToRgb} from "../tools";
 import Client from "../core/Client";
 import {ContentInterface, status} from "../core/Player";
 import {MediaClientInterface} from "../interfaces/MediaClientInterface";
+import {ResourceInterface} from "../core/Game";
 
 interface GameStyle {
     backgroundColor: string,
@@ -18,10 +19,15 @@ export default class WebClient extends Client implements MediaClientInterface {
     public gameMusic = new Audio();
     protected volume: number = 1;
 
-    private _style: GameStyle = {
+    protected _style: GameStyle = {
         backgroundColor: '',
         textColor: '',
     };
+
+    constructor(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw") {
+        super(questname, quest, resources, mode);
+        this._player.continue();
+    }
 
     /**
      * "закрыть" игру
@@ -103,6 +109,7 @@ export default class WebClient extends Client implements MediaClientInterface {
         this._text = text;
         this._buttons = this.player.buttons;
         this._links = this.player.links;
+        this._inventory = Object.values(this.game.inventory.items);
         this.setBackColor();
     }
 

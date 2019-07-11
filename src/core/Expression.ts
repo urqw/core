@@ -1,4 +1,4 @@
-import Game from "./Game";
+import Game, {GameVarValue} from "./Game";
 
 export default class Expression {
 
@@ -100,7 +100,7 @@ export default class Expression {
     return this;
   }
 
-  public calc() : number | string {
+  public calc() : GameVarValue {
     const stack: string[] = this.toRPN();
     const temp : any[] = [];
 
@@ -108,7 +108,7 @@ export default class Expression {
       let token = stack[i];
 
       if (Expression.getPriority(token) > 0) {
-        let result : number | string = 0;
+        let result : GameVarValue = 0;
 
         if (/*token == '!' ||*/ token === "not") {
           let variable = temp.pop();

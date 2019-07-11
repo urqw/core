@@ -10,7 +10,7 @@ export default class Quest {
 
     protected labels: LabelInterface = {};
 
-    protected useLabels: LabelInterface = {};
+    public useLabels: LabelInterface = {};
 
     protected quest: string[];
 

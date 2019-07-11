@@ -6,11 +6,17 @@ import Player, {
 } from "./Player";
 import Game, {ResourceInterface} from "./Game";
 import {ClientInterface} from "../interfaces/ClientInterface";
+import {ItemInterface} from "./Inventory";
 
-export default abstract class Client implements ClientInterface{
+export default abstract class Client implements ClientInterface {
+    get resources(): ResourceInterface {
+        return this.game.resources;
+    }
+
     get player(): Player {
         return this._player;
     }
+
     get buttons(): ButtonInterface[] {
         return this._buttons;
     }
@@ -23,10 +29,16 @@ export default abstract class Client implements ClientInterface{
         return this._links;
     }
 
+    get inventory(): ItemInterface[] {
+        return this._inventory;
+    }
+
     /**
      * проигрыватель
      */
     protected _player: Player;
+
+    protected _inventory: ItemInterface[] = [];
 
     /**
      * инстанс игры
@@ -40,13 +52,12 @@ export default abstract class Client implements ClientInterface{
     protected _links: LinkInterface = [];
 
     public constructor(questname: string, quest: string, resources: ResourceInterface, mode: string = "urqw") {
-        const gameInstance : Game = new Game(questname, quest, this);
+        const gameInstance: Game = new Game(questname, quest, this);
         gameInstance.resources = resources;
         gameInstance.setVar("urq_mode", mode);
 
         this.game = gameInstance;
         this._player = new Player(this.game, this);
-        this._player.continue();
     }
 
     /**
@@ -86,6 +97,13 @@ export default abstract class Client implements ClientInterface{
     }
 
     /**
+     * items
+     */
+    public inventoryAction(action: string): void {
+        this._player.useAction(action);
+    }
+
+    /**
      * link
      */
     public anykeyDone(keyCode: string): void {
@@ -99,7 +117,7 @@ export default abstract class Client implements ClientInterface{
     /**
      * link
      */
-    public inputDone(text: string) : void {
+    public inputDone(text: string): void {
         if (this.isStatusInput()) {
             return this._player.inputAction(text);
         }
@@ -139,7 +157,7 @@ export default abstract class Client implements ClientInterface{
         return true;
     }
 
-    abstract getLineBreakSymbol() : string;
+    abstract getLineBreakSymbol(): string;
 
     abstract generateLink(text: string, action: number): string;
 
@@ -152,9 +170,12 @@ export default abstract class Client implements ClientInterface{
         this._text = this._player.text;
         this._links = this._player.links;
         this._buttons = this._player.buttons;
+        this._inventory = Object.values(this.game.inventory.items);
     }
 
-    abstract isTimer() : boolean;
-    abstract removeTimer() : void;
-    abstract setTimer(callback: () => void, milliseconds : number) : void;
+    abstract isTimer(): boolean;
+
+    abstract removeTimer(): void;
+
+    abstract setTimer(callback: () => void, milliseconds: number): void;
 }

@@ -1,9 +1,10 @@
 import Parser from "./Parser";
 import Client from "./Client";
 import {intColorToRgb} from "../tools";
-import Game, {ItemInterface, VarInterface} from "./Game";
+import Game, {GameVarValue, VarInterface} from "./Game";
 import {ClientInterface} from "../interfaces/ClientInterface";
 import WebClient from "../clients/WebClient";
+import {ItemsInterface} from "./Inventory";
 
 export enum modes {
     RIPURQ = 'ripurq',
@@ -15,7 +16,7 @@ export interface SavedGameInterface {
     status: status,
     text: ContentInterface[],
     buttons: ButtonInterface[],
-    items: ItemInterface,
+    items: ItemsInterface,
     vars: VarInterface,
     position: number,
 }
@@ -216,7 +217,7 @@ export default class Player {
         this.fin();
     }
 
-    protected useAction(labelName: string): void {
+    public useAction(labelName: string): void {
         this.play("proc " + labelName + "&end");
         this.fin();
     }
@@ -235,7 +236,7 @@ export default class Player {
         this.continue();
     }
 
-    public setVar(variable: string, value: string | number): void {
+    public setVar(variable: string, value: GameVarValue): void {
         this.game.setVar(variable, value);
     }
 
@@ -299,10 +300,6 @@ export default class Player {
      */
     public perkill(): void {
         this.game.vars = {};
-
-        for (let key in this.game.items) {
-            this.game.setVar(key, this.game.items[key]);
-        }
     }
 
     public cls(): void {
@@ -324,11 +321,11 @@ export default class Player {
 
     public invkill(item : string | null = null): void {
         if (item === null) {
-            for (let key in this.game.items) {
-                this.game.setItem(key, 0);
+            for (let key in this.game.inventory) {
+                this.game.inventory.setItem(key, 0);
             }
         } else {
-            this.game.setItem(item, 0);
+            this.game.inventory.setItem(item, 0);
         }
     }
 
@@ -396,15 +393,15 @@ export default class Player {
     }
 
     public invRemove(item: string, quantity: number): void {
-        this.game.removeItem(item, quantity);
+        this.game.inventory.removeItem(item, quantity);
     }
 
     public invAdd(item: string, quantity: number): void {
-        this.game.addItem(item, quantity);
+        this.game.inventory.addItem(item, quantity);
     }
 
     public print(text: string, ln: boolean): void {
-        const color : string | number = this.game.getVar('style_textcolor');
+        const color : GameVarValue = this.game.getVar('style_textcolor');
 
         let textColor : string = '';
 
@@ -451,7 +448,7 @@ export default class Player {
             status: this.getStatus(),
             text: this._text,
             buttons: this._buttons,
-            items: this.game.items,
+            items: this.game.inventory.items,
             vars: this.game.vars,
             position: this.game.position,
         };
@@ -464,7 +461,7 @@ export default class Player {
         this.status = data.status;
         this._text = data.text;
         this._buttons = data.buttons;
-        this.game.items = data.items;
+        this.game.inventory.items = data.items;
         this.game.vars = data.vars;
         this.game.position = data.position;
     }

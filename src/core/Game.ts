@@ -4,20 +4,19 @@ import ModeUrqDos from "../modes/urqdos";
 import {modes} from "./Player";
 import {ClientInterface} from "../interfaces/ClientInterface";
 import {dosColorToHex} from "../tools";
-
-export interface ItemInterface {
-    [key: string]: number
-}
+import Inventory from "./Inventory";
 
 export interface VarInterface {
-    [key: string]: string | number
+    [key: string]: GameVarValue
 }
 
+export type GameVarValue = string | number;
+
 export interface SystemVarInterface {
-    defaultValue: string | number,
-    value: string | number,
-    setCallback: ((value: string | number) => void) | null,
-    getCallback: (() => string | number) | null,
+    defaultValue: GameVarValue,
+    value: GameVarValue,
+    setCallback: ((varname: string, value: GameVarValue) => void) | null,
+    getCallback: ((varname: string) => GameVarValue) | null,
 }
 
 export interface ResourceInterface {
@@ -42,15 +41,16 @@ export default class Game {
 
     public resources: ResourceInterface = {};
 
-    public items: ItemInterface = {};
+    public inventory: Inventory;
 
     public vars: VarInterface = {};
 
     protected systemVars: { [key: string]: SystemVarInterface } = {
-        'urq_mode': {
-            'defaultValue': '',
-            'value': '',
-            'setCallback': (value: string | number) => {
+        urq_mode: {
+            defaultValue: '',
+            value: '',
+            // @ts-ignore
+            setCallback: (varname: string, value: GameVarValue) => {
                 if (value === modes.RIPURQ) {
                     ModeUrqRip();
                 }
@@ -60,13 +60,13 @@ export default class Game {
                     this.setVar('style_textcolor', '#FFF');
                 }
             },
-            'getCallback': null,
+            getCallback: null,
         },
-        'time': {
-            'defaultValue': '',
-            'value': '',
-            'setCallback': null,
-            'getCallback': () => {
+        time: {
+            defaultValue: '',
+            value: '',
+            setCallback: null,
+            getCallback: () => {
                 const Datetime = new Date();
                 return (
                     Datetime.getHours() * 3600 +
@@ -75,80 +75,76 @@ export default class Game {
                 );
             }
         },
-        'tokens_delim': {
-            'defaultValue': ' ,"?!',
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+        tokens_delim: {
+            defaultValue: ' ,"?!',
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'music': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': (src: string | number) => {
+        music: {
+            defaultValue: 0,
+            value: '',
+            // @ts-ignore
+            setCallback: (varname: string, src: GameVarValue) => {
                 this.client.player.playMusic(String(src));
             },
-            'getCallback': null,
+            getCallback: null,
         },
-        'current_loc': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+        current_loc: {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'previous_loc': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+        previous_loc: {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'rnd': {
-            'defaultValue': '',
-            'value': '',
-            'setCallback': null,
-            'getCallback': () => {
+        rnd: {
+            defaultValue: '',
+            value: '',
+            setCallback: null,
+            getCallback: () => {
                 return Math.random();
             },
         },
-        'rnd[0-9+]': {
-            'defaultValue': '',
-            'value': '',
-            'setCallback': null,
-            'getCallback': () => {
-                return Math.floor(Math.random() * Number(this.systemVars['rnd[0-9+]'].value)) + 1
-            },
+        style_textcolor: {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'style_textcolor': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
-        },
-        'style_dos_textcolor': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': (value: string | number) => {
+        style_dos_textcolor: {
+            defaultValue: 0,
+            value: '',
+            // @ts-ignore
+            setCallback: (varname: string, value: GameVarValue) => {
                 this.setVar("style_textcolor", dosColorToHex(Number(value)));
             },
-            'getCallback': null,
+            getCallback: null,
         },
-        'style_backcolor': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+        style_backcolor: {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'style_dos_backcolor': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': (value: string | number) => {
+        style_dos_backcolor: {
+            defaultValue: 0,
+            value: '',
+            // @ts-ignore
+            setCallback: (varname: string, value: GameVarValue) => {
                 this.setVar("style_backcolor", dosColorToHex(Number(value)));
             },
-            'getCallback': null,
+            getCallback: null,
         },
-        'image': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': (value: string | number) => {
+        image: {
+            defaultValue: 0,
+            value: '',
+            // @ts-ignore
+            setCallback: (varname: string, value: GameVarValue) => {
                 let file: string = String(value);
                 if (this.resources != null) {
                     if (this.resources[file] !== undefined) {
@@ -163,19 +159,49 @@ export default class Game {
 
                 this.client.player.image(file);
             },
-            'getCallback': null,
+            getCallback: null,
         },
-        'common': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+        common: {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
         },
-        'count_[.+]': {
-            'defaultValue': 0,
-            'value': '',
-            'setCallback': null,
-            'getCallback': null,
+    };
+
+    protected systemVarsNotExact: { [key: string]: SystemVarInterface } = {
+        'rnd[number]': {
+            defaultValue: '',
+            value: '',
+            setCallback: null,
+            getCallback: (varname : string) : GameVarValue => {
+                const rndmaxValue = varname.match(/rnd([0-9+])/i);
+                return Math.floor(Math.random() * Number((rndmaxValue as any)[1])) + 1
+            },
+        },
+        'count_[location]': {
+            defaultValue: 0,
+            value: '',
+            setCallback: null,
+            getCallback: null,
+        },
+        item: {
+            defaultValue: 0,
+            value: '',
+            setCallback: (varname : string, value: GameVarValue) : void => {
+                if (varname.startsWith("inv_")) {
+                    varname = varname.substr(4);
+                }
+
+                return this.inventory.setItem(varname, Number(value));
+            },
+            getCallback: (varname : string) : GameVarValue => {
+                if (varname.startsWith("inv_")) {
+                    varname = varname.substr(4);
+                }
+
+                return this.inventory.getItemQuantity(varname);
+            },
         },
     };
 
@@ -195,84 +221,50 @@ export default class Game {
         this.client = Client;
         this._name = name;
         this._quest = new Quest(qst);
+        this.inventory = new Inventory(this._quest.useLabels);
 
         this.clean();
     }
 
-    public addItem(name: string, count: number): void {
-        this.setItem(name, this.getItem(name) + count);
-    }
-
-    public removeItem(name: string, count: number): void {
-        this.setItem(name, this.getItem(name) - count);
-    }
-
-    public setItem(name: string, count: number): void {
-        if (count <= 0) {
-            delete this.items[name];
-            this.setVar(name, 0);
-        } else {
-            this.items[name] = count;
-            this.setVar(name, count);
-        }
-    }
-
-    public getItem(name: string): number {
-        return this.items[name] === undefined ? 0 : this.items[name];
-    }
-
-    public setVar(variable: string, value: string | number) {
+    public setVar(variable: string, value: GameVarValue) {
         variable = variable.toLowerCase();
 
         let systemVar = this.getSystemVar(variable);
         if (systemVar !== null) {
             if (typeof systemVar.setCallback === 'function') {
-                systemVar.setCallback(value);
+                systemVar.setCallback(variable, value);
             } else {
                 systemVar.value = value;
             }
         } else {
-            if (variable.startsWith("inv_")) {
-                variable = variable.substr(4);
-
-                this.setItem(variable, Number(value));
-            } else {
-                this.vars[variable] = value;
-            }
+            this.vars[variable] = value;
         }
     }
 
-    public getVar(variable: string): string | number {
+    public getVar(variable: string): GameVarValue {
         variable = variable.toLowerCase();
 
         let systemVar = this.getSystemVar(variable);
         if (systemVar !== null) {
             if (typeof systemVar.getCallback === 'function') {
-                return systemVar.getCallback();
+                return systemVar.getCallback(variable);
             } else {
                 return this.systemVars[variable].value;
             }
         }
 
-        if (variable.startsWith("inv_")) {
-            variable = variable.substr(4);
+        // todo костыль Для выражений вроде "1 деньги"
+        if (variable.split(" ").length > 1) {
+            const count = variable.split(" ")[0];
+            if (!isNaN(count as any)) {
+                variable = variable
+                    .split(" ")
+                    .slice(1)
+                    .join(" ")
+                    .trim();
+                return (this.vars[variable] >= count) ? 1 : 0;
+            }
         }
-
-        /*
-
-                // Для выражений вроде "1 деньги"
-                if (variable.split(" ").length > 1) {
-                    const count = variable.split(" ")[0];
-                    if (!isNaN(count)) {
-                        variable = variable
-                            .split(" ")
-                            .slice(1)
-                            .join(" ")
-                            .trim();
-                        return this._vars[variable] >= count;
-                    }
-                }
-        */
 
         if (this.vars[variable] !== undefined) {
             return this.vars[variable];
@@ -286,7 +278,7 @@ export default class Game {
      */
     public clean(): void {
         this.position = 0;
-        this.items = {};
+        this.inventory.items = {};
         this.vars = {};
 
         this.resetSystemVars();
@@ -305,11 +297,12 @@ export default class Game {
             return this.systemVars[variable];
         }
 
-        const regex = /rnd([0-9+])/i;
-        const result = variable.match(regex);
-        if (result !== null) {
-            this.systemVars['rnd[0-9+]'].value = result[1];
-            return this.systemVars['rnd[0-9+]'];
+        if (variable.startsWith("inv_") || this.inventory.items[variable.toLowerCase()] !== undefined) {
+            return this.systemVarsNotExact['item'];
+        }
+
+        if (/rnd([0-9+])/i.test(variable)) {
+            return this.systemVars['rnd[number]'];
         }
 
         return null;
@@ -318,6 +311,9 @@ export default class Game {
     protected resetSystemVars(): void {
         for (let key in this.systemVars) {
             this.systemVars[key].value = this.systemVars[key].defaultValue;
+        }
+        for (let key in this.systemVarsNotExact) {
+            this.systemVarsNotExact[key].value = this.systemVarsNotExact[key].defaultValue;
         }
 
         this.systemVars["current_loc"].value = this._quest.firstLabel;
